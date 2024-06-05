@@ -5,6 +5,8 @@
 #include <linux/list.h>
 
 #include "asm/trapnr.h"
+#include "asm/tdx.h"
+#include "asm/shared/tdx.h"
 
 #include "tdx-compliance.h"
 #include "tdx-compliance-cpuid.h"
@@ -35,6 +37,9 @@ char case_name[256];
 char version_name[32];
 char *buf_ret;
 static struct dentry *f_tdx_tests, *d_tdx;
+static u64 tdcs_td_ctl;
+static u64 tdcs_feature_pv_ctl;
+
 LIST_HEAD(cpuid_list);
 
 #define SIZE_BUF		(PAGE_SIZE << 3)
@@ -133,11 +138,29 @@ static int check_results_msr(struct test_msr *t)
 		return -1;
 }
 
+static int _native_cpuid(unsigned int *eax, unsigned int *ebx, unsigned int *ecx, unsigned int *edx)
+{
+         int err;
+         asm volatile("1: cpuid\n"
+                      "2: \n\t"
+                      _ASM_EXTABLE_TYPE_REG(1b, 2b, EX_TYPE_FAULT, %[err])
+                      : [err] "=a" (*eax), "=b" (*ebx), "=c" (*ecx), "=d" (*edx)
+                      : "0" (*eax), "2" (*ecx)
+                      : "memory");
+
+         return err;
+}
+
 static int run_cpuid(struct test_cpuid *t)
 {
 	t->regs.eax.val = t->leaf;
 	t->regs.ecx.val = t->subleaf;
-	__cpuid(&t->regs.eax.val, &t->regs.ebx.val, &t->regs.ecx.val, &t->regs.edx.val);
+	tdcs_td_ctl = t->tdcs_td_ctl;
+	tdcs_feature_pv_ctl = t->tdcs_feature_pv_ctl;
+	setup_tdcs_ctl();
+	_native_cpuid(&t->regs.eax.val, &t->regs.ebx.val, &t->regs.ecx.val, &t->regs.edx.val);
+	int cpu_id = smp_processor_id();
+	printk(KERN_INFO "From CPU core %d\n", cpu_id);
 
 	return 0;
 }
@@ -474,6 +497,68 @@ const struct file_operations data_file_fops = {
 	.write = tdx_tests_proc_write,
 	.read = tdx_tests_proc_read,
 };
+
+u64 tdg_sys_read(u64 field, u64 *val)
+{
+       u64 r;
+       struct tdx_module_args arg = {
+               .rdx = field,
+       };
+
+       r = tdcall(TDG_VM_WR, &arg);
+       if (!r)
+               *val = arg.r8;
+       return r;
+}
+
+u64 tdg_vm_write(u64 field, u64 val, u64 mask)
+{
+       struct tdx_module_args arg = {
+               .rcx = 0,
+               .rdx = field,
+               .r8 = val,
+               .r9 = mask,
+       };
+
+       return tdcall(TDG_VM_WR, &arg);
+}
+
+static void setup_tdcs_ctl(void)
+{
+       struct tdx_module_args arg;
+       u64 r;
+
+       arg.rdx = TDX_GLOBAL_FIELD_FEATURES0;
+       r = tdcall(TDG_SYS_RD, &arg);
+       if (!r)
+               printk("TDX FEATURES0:0x%llu\n", arg.r8);
+       else
+               printk("WARN: Failed to get TDX FEATURES0, err:0x%llu\n", r);
+
+       if (tdcs_td_ctl) {
+               r = tdg_vm_write(TDX_TDCS_FIELD_TD_CTL,
+                                tdcs_td_ctl, tdcs_td_ctl);
+               if (!r)
+                       printk("TDX_TDCS_FILED_TD_CTL set to 0x%llu\n",
+                              tdcs_td_ctl);
+               else
+                       printk("TDX_TDCS_FILED_TD_CTL set to 0x%llu failure, err:0x%llu\n",
+                              tdcs_td_ctl, r);
+       }
+/*
+       if (tdcs_feature_pv_ctl) {
+               r = tdg_vm_write(TDX_TDCS_FIELD_FEATURE_PV_CTL,
+                                tdcs_feature_pv_ctl, tdcs_feature_pv_ctl);
+               if (!r)
+                       printk("TDX_TDCS_FIELD_FEATURE_PV_CTL set to 0x%llu\n",
+                              tdcs_feature_pv_ctl);
+
+               else
+                       printk("TDX_TDCS_FIELD_FEATURE_PV_CTL set to 0x%llu failure, err:0x%llu\n",
+                              tdcs_feature_pv_ctl, r);
+       }
+*/
+}
 
 static int __init tdx_tests_init(void)
 {

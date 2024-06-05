@@ -21,6 +21,19 @@
 #define MSR_IA32_INT_SSP_TAB		0x000006a8
 /****** END of Backport ******/
 
+/* TDX TDCALL.VMCALL leaf id  */
+#define TDG_VM_WR                      8
+#define TDG_SYS_RD                     11
+
+/* For #VE Reduction */
+/* Global metadata field TDX_FEATURES0 */
+#define TDX_GLOBAL_FIELD_FEATURES0     0x0A00000300000008
+/* TDCS.TD_CTLS.REDUCE_VE */
+#define TDX_TDCS_FIELD_TD_CTL          0x9110000300000017
+/* TDCS.FEATURE_PARAVIRT_CTLS */
+#define TDX_TDCS_FIELD_FEATURE_PV_CTL         0x9110000300000022
+
+
 #define VER1_0 1
 #define VER1_5 2
 #define VER2_0 4
@@ -46,6 +59,8 @@ struct test_cpuid {
 	int version;
 	struct cpuid_regs_ext regs;
 	struct list_head list;
+	u64 tdcs_td_ctl;
+	u64 tdcs_feature_pv_ctl;
 };
 
 struct cr_reg {
@@ -87,6 +102,8 @@ struct test_msr {
 	int (*run_msr_rw)(struct test_msr *p_test_msr);
 	void (*pre_condition)(struct test_msr *p_test_msr);
 	struct cpuid_regs_ext regs;
+	u64 tdcs_td_ctl;
+	u64 tdcs_feature_pv_ctl;
 };
 
 static int run_cpuid(struct test_cpuid *t);
@@ -96,6 +113,7 @@ int __no_profile _native_write_cr0(u64 val);
 int __no_profile _native_write_cr4(u64 val);
 static int write_msr_native(struct test_msr *c);
 static int read_msr_native(struct test_msr *c);
+static void setup_tdcs_ctl(void);
 
 u64 cur_cr4, cur_cr0;
 extern struct list_head cpuid_list;
