@@ -4,7 +4,7 @@
 #define NO_EXCP 0
 #define NO_PRE_COND NULL
 
-#define DEF_MSR(_name, _msr_num, _rw, _excp, _precond, _size, _vsn)	\
+#define DEF_MSR(_name, _msr_num, _rw, _excp, _precond, _size, _vsn, _td_ctl, _pv_ctl)	\
 {							\
 	.name = _name "_" #_rw,			\
 	.version = _vsn,				\
@@ -13,19 +13,21 @@
 	.excp.expect = _excp,				\
 	.pre_condition = _precond,			\
 	.size = _size,					\
+	.tdcs_td_ctl = _td_ctl,                         \
+	.tdcs_feature_pv_ctl = _pv_ctl                  \
 }
 
-#define DEF_READ_MSR(_msr_num, _excp, _precond, _vsn)			\
-	DEF_MSR(#_msr_num, _msr_num, read, _excp, _precond, 1, _vsn)
+#define DEF_READ_MSR(_msr_num, _excp, _precond, _vsn, _td_ctl, _pv_ctl)			\
+	DEF_MSR(#_msr_num, _msr_num, read, _excp, _precond, 1, _vsn, _td_ctl, _pv_ctl)
 
-#define DEF_WRITE_MSR(_msr_num, _excp, _precond, _vsn)			\
-	DEF_MSR(#_msr_num, _msr_num, write, _excp, _precond, 1, _vsn)
+#define DEF_WRITE_MSR(_msr_num, _excp, _precond, _vsn, _td_ctl, _pv_ctl)			\
+	DEF_MSR(#_msr_num, _msr_num, write, _excp, _precond, 1, _vsn, _td_ctl, _pv_ctl)
 
-#define DEF_READ_MSR_SIZE(_msr_num, _excp, _precond, _size, _vsn)	\
-	DEF_MSR(#_msr_num, _msr_num, read, _excp, _precond, _size, _vsn)
+#define DEF_READ_MSR_SIZE(_msr_num, _excp, _precond, _size, _vsn, _td_ctl, _pv_ctl)	\
+	DEF_MSR(#_msr_num, _msr_num, read, _excp, _precond, _size, _vsn, _td_ctl, _pv_ctl)
 
-#define DEF_WRITE_MSR_SIZE(_msr_num, _excp, _precond, _size, _vsn)	\
-	DEF_MSR(#_msr_num, _msr_num, write, _excp, _precond, _size, _vsn)
+#define DEF_WRITE_MSR_SIZE(_msr_num, _excp, _precond, _size, _vsn, _td_ctl, _pv_ctl)	\
+	DEF_MSR(#_msr_num, _msr_num, write, _excp, _precond, _size, _vsn, _td_ctl, _pv_ctl)
 
 #define MSR_IA32_MKTME_PARTITIONING 0x87
 #define MSR_WBINVDP 0x98

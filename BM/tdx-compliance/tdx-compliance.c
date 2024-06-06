@@ -153,13 +153,15 @@ static int _native_cpuid(unsigned int *eax, unsigned int *ebx, unsigned int *ecx
 
 static int run_cpuid(struct test_cpuid *t)
 {
+	int err, cpu_id;
 	t->regs.eax.val = t->leaf;
 	t->regs.ecx.val = t->subleaf;
 	tdcs_td_ctl = t->tdcs_td_ctl;
 	tdcs_feature_pv_ctl = t->tdcs_feature_pv_ctl;
 	setup_tdcs_ctl();
-	_native_cpuid(&t->regs.eax.val, &t->regs.ebx.val, &t->regs.ecx.val, &t->regs.edx.val);
-	int cpu_id = smp_processor_id();
+	err = _native_cpuid(&t->regs.eax.val, &t->regs.ebx.val, &t->regs.ecx.val, &t->regs.edx.val);
+	printk(KERN_INFO "read cpuid return %d\n", err);
+	cpu_id = smp_processor_id();
 	printk(KERN_INFO "From CPU core %d\n", cpu_id);
 
 	return 0;
@@ -253,6 +255,9 @@ static int run_all_msr(void)
 			continue;
 		}
 
+		tdcs_td_ctl = t->tdcs_td_ctl;
+		tdcs_feature_pv_ctl = t->tdcs_feature_pv_ctl;
+		setup_tdcs_ctl();
 		if (t->pre_condition)
 			t->pre_condition(t);
 		if (t->run_msr_rw)
