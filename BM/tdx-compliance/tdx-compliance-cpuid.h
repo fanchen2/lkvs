@@ -107,8 +107,8 @@ void initial_cpuid(void)
         /* CPUID(0x6) */
         EXP_CPUID_BIT(0x6, 0, eax, 2, 0x0, VER1_5, 0, 0); //Backward-Compatible, trigger #VE
         EXP_CPUID_BIT(0x6, 0, eax, 2, 0x1, VER1_5, 8, 0); //Reduced-#VE
-        EXP_CPUID_RES_BITS(0x6, 0, eax, 0, 1, 0x0, VER1_5, 8, 0); //Reduced-#VE
-        EXP_CPUID_RES_BITS(0x6, 0, eax, 3, 31, 0x0, VER1_5, 8, 0); //Reduced-#VE
+        EXP_CPUID_RES_BITS(0x6, 0, eax, 0, 1, VER1_5, 8, 0); //Reduced-#VE
+        EXP_CPUID_RES_BITS(0x6, 0, eax, 3, 31, VER1_5, 8, 0); //Reduced-#VE
         EXP_CPUID_BYTE(0x6, 0, ebx, 0x0, VER1_5, 8, 0); //Reduced-#VE
         EXP_CPUID_BYTE(0x6, 0, ecx, 0x0, VER1_5, 8, 0); //Reduced-#VE
         EXP_CPUID_BYTE(0x6, 0, edx, 0x0, VER1_5, 8, 0); //Reduced-#VE
