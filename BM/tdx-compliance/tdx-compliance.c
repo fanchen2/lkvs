@@ -629,9 +629,21 @@ static void setup_tdcs_ctl(void)
 
         printk("TDX FEATURES0:0x%llu\n", arg.r8);
 
+        r = tdg_vm_read(TDX_TDCS_FIELD_TD_CTL, &v);
+        if (!r)
+                printk("TDX_TDCS_FILED_TD_CTL before set:0x%lx\n", v);
+        else
+                printk("Failed to read TDX_TDCS_FILED_TD_CTL\n");
+
+        r = tdg_vm_read(TDX_TDCS_FIELD_FEATURE_PV_CTL, &v);
+        if (!r)
+                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL before set:0x%lx\n", v);
+        else
+                printk("Failed to read TDX_TDCS_FIELD_FEATURE_PV_CTL\n");
+
         ve_reduce = arg.r8 & MD_FIELD_ID_FEATURES0_VE_REDUCE;
         vcpu_toplgy = arg.r8 & MD_FIELD_ID_FEATURES0_VCPU_TPLGY;
-        if (ve_reduce || vcpu_toplgy) {
+	if ((ve_reduce || vcpu_toplgy) && tdcs_td_ctl != 0xbad) {
                 mask = tdcs_td_ctl ? tdcs_td_ctl : 0x800000000000000eULL;
                 r = tdg_vm_write(TDX_TDCS_FIELD_TD_CTL, tdcs_td_ctl, mask);
                 if (!r)
@@ -641,9 +653,9 @@ static void setup_tdcs_ctl(void)
                         printk("TDX_TDCS_FILED_TD_CTL set to 0x%llu failure, err:0x%llu\n",
                                tdcs_td_ctl, r);
         } else
-                printk("TDX_TDCS_FILED_TD_CTL is not supported\n");
+                printk("TDX_TDCS_FILED_TD_CTL is not supported or not set (0x%llu)\n", tdcs_td_ctl);
 
-        if (ve_reduce) {
+	if (ve_reduce && tdcs_td_ctl != 0xbad) {
                 mask = tdcs_feature_pv_ctl ? tdcs_feature_pv_ctl : -1ULL;
                 r = tdg_vm_write(TDX_TDCS_FIELD_FEATURE_PV_CTL,
                                  tdcs_feature_pv_ctl, mask);
@@ -654,7 +666,20 @@ static void setup_tdcs_ctl(void)
                         printk("TDX_TDCS_FIELD_FEATURE_PV_CTL set to 0x%llu failure, err:0x%llu\n",
                                tdcs_feature_pv_ctl, r);
         } else
-                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL is not supported\n");
+                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL is not supported or not set (tdcs_ctl=0x%lx)\n", tdcs_td_ctl);
+
+        r = tdg_vm_read(TDX_TDCS_FIELD_TD_CTL, &v);
+        if (!r)
+                printk("TDX_TDCS_FILED_TD_CTL after set:0x%llu\n", v);
+        else
+                printk("Failed to read TDX_TDCS_FILED_TD_CTL\n");
+
+        r = tdg_vm_read(TDX_TDCS_FIELD_FEATURE_PV_CTL, &v);
+        if (!r)
+                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL after set:0x%llu\n", v);
+        else
+                printk("Failed to read TDX_TDCS_FIELD_FEATURE_PV_CTL\n");
+
 }
 
 static int __init tdx_tests_init(void)
