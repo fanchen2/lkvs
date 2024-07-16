@@ -63,40 +63,49 @@ void initial_cpuid(void)
         EXP_CPUID_BIT(0x1, 0, ecx, 7, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 7, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 7, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, ecx, 7, 0x0, VER1_5, 8, 0); //Reduced-#VE, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 7, 0x1, VER1_5, 8, BIT(2)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 7, 0x0, VER1_5, 8, BIT(2)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* TSC_DEADLINE(tsc-deadline) */
         EXP_CPUID_BIT(0x1, 0, ecx, 24, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 24, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 24, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, ecx, 24, 0x0, VER1_5, 8, 0); //Reduced-#VE, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 24, 0x1, VER1_5, 8, BIT(11)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, ecx, 24, 0x0, VER1_5, 8, BIT(11)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* MCA(mce) */
-        EXP_CPUID_BIT(0x1, 0, edx, 7, 0x1, VER1_5, 0, 0); //Backward-Compatible
+        EXP_CPUID_BIT(0x1, 0, edx, 7, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, edx, 7, 0x1, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 7, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, edx, 7, 0x0, VER1_5, 8, 0); //Reduced-#VE, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 7, 0x1, VER1_5, 8, BIT(3)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 7, 0x0, VER1_5, 8, BIT(3)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* MTRR(mtrr) */
-        EXP_CPUID_BIT(0x1, 0, edx, 12, 0x1, VER1_5, 0, 0); //Backward-Compatible
+        EXP_CPUID_BIT(0x1, 0, edx, 12, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, edx, 12, 0x1, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 12, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, edx, 12, 0x0, VER1_5, 8, 0); //Reduced-#VE, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 12, 0x1, VER1_5, 8, BIT(4)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 12, 0x0, VER1_5, 8, BIT(4)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* MCA(mca) */
-        EXP_CPUID_BIT(0x1, 0, edx, 14, 0x1, VER1_5, 0, 0); //Backward-Compatible, MCA(mca)
+        EXP_CPUID_BIT(0x1, 0, edx, 14, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, edx, 14, 0x1, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 14, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, edx, 14, 0x0, VER1_5, 8, 0); //Reduced-#VE, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 14, 0x1, VER1_5, 8, BIT(3)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 14, 0x0, VER1_5, 8, BIT(3)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* TM(acpi) */
         EXP_CPUID_BIT(0x1, 0, edx, 22, 0x1, VER1_5, 0, 0); //Backward-Compatible, TM(acpi), enable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 22, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 22, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, edx, 22, 0x0, VER1_5, 8, 0); //Reduced-#VE, disable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 22, 0x1, VER1_5, 8, BIT(8)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x1, 0, edx, 22, 0x0, VER1_5, 8, BIT(8)); //Reduced-#VE + Paravirtualization, disable it by qemu
 
         /* CPUID(0x2) */
         EXP_CPUID_BYTE(0x2, 0, eax, 0, VER1_5, 0, 0); //Backward-Compatible, trigger #VE
         EXP_CPUID_BYTE(0x2, 0, eax, 0x00feff01, VER1_5, 4, 0); //VIRT_CPUID2
-        EXP_CPUID_BYTE(0x2, 0, ebx, 0, VER1_5, 4, 0); //VIRT_CPUID2
+        EXP_CPUID_BYTE(0x5, 0, ebx, 0, VER1_5, 4, 0); //VIRT_CPUID2
         EXP_CPUID_BYTE(0x2, 0, ecx, 0, VER1_5, 4, 0); //VIRT_CPUID2
         EXP_CPUID_BYTE(0x2, 0, edx, 0, VER1_5, 4, 0); //VIRT_CPUID2
         EXP_CPUID_BYTE(0x2, 0, eax, 0x00feff01, VER1_5, 8, 0); //Reduced-#VE
@@ -108,39 +117,45 @@ void initial_cpuid(void)
         EXP_CPUID_BIT(0x6, 0, eax, 2, 0x0, VER1_5, 0, 0); //Backward-Compatible, trigger #VE
         EXP_CPUID_BIT(0x6, 0, eax, 2, 0x1, VER1_5, 8, 0); //Reduced-#VE
         EXP_CPUID_RES_BITS(0x6, 0, eax, 0, 1, VER1_5, 8, 0); //Reduced-#VE
-        EXP_CPUID_RES_BITS(0x6, 0, eax, 3, 31, VER1_5, 8, 0); //Reduced-#VE
+        EXP_CPUID_RES_BITS(0x6, 0, eax, 3, 31,  VER1_5, 8, 0); //Reduced-#VE
         EXP_CPUID_BYTE(0x6, 0, ebx, 0x0, VER1_5, 8, 0); //Reduced-#VE
         EXP_CPUID_BYTE(0x6, 0, ecx, 0x0, VER1_5, 8, 0); //Reduced-#VE
         EXP_CPUID_BYTE(0x6, 0, edx, 0x0, VER1_5, 8, 0); //Reduced-#VE
 
         /* CPUID(0x7) */
         /* CORE_CAPABILITIES(core-capability) */
-        EXP_CPUID_BIT(0x7, 0, edx, 30, 0x1, VER1_5, 0, 0); //Backward-Compatible
+        EXP_CPUID_BIT(0x7, 0, edx, 30, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
+        EXP_CPUID_BIT(0x7, 0, edx, 30, 0x1, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x7, 0, edx, 30, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x7, 0, edx, 30, 0x0, VER1_5, 8, 0); //Reduced-#VE, dsiable it by qemu
         EXP_CPUID_BIT(0x7, 0, edx, 30, 0x1, VER1_5, 8, BIT(0)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, edx, 30, 0x0, VER1_5, 8, BIT(0)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* RDT_M(pqm) */
         EXP_CPUID_BIT(0x7, 0, ebx, 12, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 12, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 12, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x7, 0, ebx, 12, 0x0, VER1_5, 8, 0); //Reduced-#VE, dsiable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 12, 0x1, VER1_5, 8, BIT(7)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 12, 0x0, VER1_5, 8, BIT(7)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* RDT_A(rdta) */
         EXP_CPUID_BIT(0x7, 0, ebx, 15, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 15, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 15, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x7, 0, ebx, 15, 0x0, VER1_5, 8, 0); //Reduced-#VE, dsiable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 15, 0x1, VER1_5, 8, BIT(6)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, ebx, 15, 0x0, VER1_5, 8, BIT(6)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* PCONFIG(pconfig) */
         EXP_CPUID_BIT(0x7, 0, edx, 18, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, edx, 18, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x7, 0, edx, 18, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x7, 0, edx, 18, 0x0, VER1_5, 8, 0); //Reduced-#VE, dsiable it by qemu
         EXP_CPUID_BIT(0x7, 0, edx, 18, 0x1, VER1_5, 8, BIT(5)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, edx, 18, 0x0, VER1_5, 8, BIT(5)); //Reduced-#VE + Paravirtualization, disable it by qemu
         /* TME(tme) */
         EXP_CPUID_BIT(0x7, 0, ecx, 13, 0x1, VER1_5, 0, 0); //Backward-Compatible, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, ecx, 13, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BIT(0x7, 0, ecx, 13, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x7, 0, ecx, 13, 0x0, VER1_5, 8, 0); //Reduced-#VE, dsiable it by qemu
         EXP_CPUID_BIT(0x7, 0, ecx, 13, 0x1, VER1_5, 8, BIT(10)); //Reduced-#VE + Paravirtualization, enable it by qemu
         EXP_CPUID_BIT(0x7, 0, ecx, 13, 0x0, VER1_5, 8, BIT(10)); //Reduced-#VE + Paravirtualization, disable it by qemu
 
@@ -152,7 +167,7 @@ void initial_cpuid(void)
         EXP_CPUID_BIT(0x1, 0, ecx, 18, 0x0, VER1_5, 0, 0); //Backward-Compatible, disable it by qemu
         EXP_CPUID_BYTE(0x9, 0, eax, 0x0, VER1_5, 0, 0); //Backward-Compatible, VM_CTLS.CPUID_VE_DISABLE is false, trigger #VE
 
-        EXP_CPUID_BIT(0x1, 0, ecx, 18, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable it by qemu
+        EXP_CPUID_BIT(0x1, 0, ecx, 18, 0x0, VER1_5, 8, 0); //Reduced-#VE, enable/dsiable it by qemu
         EXP_CPUID_BYTE(0x9, 0, eax, 0x0, VER1_5, 8, 0); //Reduced-#VE, virtual CPUID(1).ECX[18] == 0
 
         EXP_CPUID_BIT(0x1, 0, ecx, 18, 0x0, VER1_5, 8, BIT(1)); //Reduced-#VE + Paravirtualization, disable it by qemu
@@ -228,6 +243,19 @@ void initial_cpuid(void)
         EXP_CPUID_BYTE(0x1f, 2, ecx, 0x0502, VER1_5, 2, 0);
         EXP_CPUID_BYTE(0x1f, 2, edx, 0, VER1_5, 2, 0);
 
+        EXP_CPUID_BYTE(0x1f, 0, eax, 0x1, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 0, ebx, 0x2, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 0, ecx, 0x0100, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 0, edx, 0, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, eax, 0x3, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, ebx, 0x8, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, ecx, 0x0201, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, edx, 0, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, eax, 0x3, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, ebx, 0x8, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, ecx, 0x0502, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, edx, 0, VER1_5, 8, 0);
+
         /* CPUID(0x1f) -smp 8,threads=3,cores=4 cpu11 */
         EXP_CPUID_BYTE(0x1f, 0, eax, 0, VER1_5, 0, 0); //Backward-Compatible, trigger #VE
         EXP_CPUID_BYTE(0x1f, 0, eax, 0x2, VER1_5, 2, 0);
@@ -242,5 +270,18 @@ void initial_cpuid(void)
         EXP_CPUID_BYTE(0x1f, 2, ebx, 0xc, VER1_5, 2, 0);
         EXP_CPUID_BYTE(0x1f, 2, ecx, 0x0502, VER1_5, 2, 0);
         EXP_CPUID_BYTE(0x1f, 2, edx, 0xe, VER1_5, 2, 0);
+
+        EXP_CPUID_BYTE(0x1f, 0, eax, 0x2, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 0, ebx, 0x3, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 0, ecx, 0x0100, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 0, edx, 0xe, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, eax, 0x4, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, ebx, 0xc, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, ecx, 0x0201, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 1, edx, 0xe, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, eax, 0x4, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, ebx, 0xc, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, ecx, 0x0502, VER1_5, 8, 0);
+        EXP_CPUID_BYTE(0x1f, 2, edx, 0xe, VER1_5, 8, 0);
 }
 #endif
