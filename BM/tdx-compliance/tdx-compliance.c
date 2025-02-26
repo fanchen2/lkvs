@@ -589,17 +589,31 @@ const struct file_operations data_file_fops = {
 	.read = tdx_tests_proc_read,
 };
 
-u64 tdg_sys_read(u64 field, u64 *val)
+u64 __tdx_hypercall(struct tdx_module_args *args)
 {
-       u64 r;
-       struct tdx_module_args arg = {
-               .rdx = field,
-       };
+    /*
+     * For TDVMCALL explicitly set RCX to the bitmap of shared registers.
+     * The caller isn't expected to set @args->rcx anyway.
+     */
+    args->rcx = TDVMCALL_EXPOSE_REGS_MASK;
 
-       r = tdcall(TDG_VM_WR, &arg);
-       if (!r)
-               *val = arg.r8;
-       return r;
+    /*
+     * Failure of __tdcall_saved_ret() indicates a failure of the TDVMCALL
+     * mechanism itself and that something has gone horribly wrong with
+     * the TDX module, so panic.
+     */
+    if (__tdcall_saved_ret(TDG_VP_VMCALL, args))
+        abort();
+
+    if (args->r10)
+        printf("__tdx_hypercall err:\n"
+               "R10=0x%016lx, R11=0x%016lx, R12=0x%016lx\n"
+               "R13=0x%016lx, R14=0x%016lx, R15=0x%016lx\n",
+               args->r10, args->r11, args->r12, args->r13, args->r14,
+               args->r15);
+
+    /* TDVMCALL leaf return code is in R10 */
+    return args->r10;
 }
 
 u64 tdg_vm_write(u64 field, u64 val, u64 mask)
