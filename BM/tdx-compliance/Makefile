@@ -2,13 +2,14 @@
 
 MODULES = tdx-compliance.ko
 
-obj-m += tdx-compliance.o
-
 ifeq ($(KERNEL_SRC),)
 KDIR ?= /lib/modules/$(shell uname -r)/build
 else
 KDIR ?= $(abspath $(KERNEL_SRC))
 endif
+
+obj-m += tdx-compliance.o
+tdx-compliance-y := tdx-compliance.o tdcall.o tdxcall.o
 
 all:
 	make -C $(KDIR) M=$(PWD) modules

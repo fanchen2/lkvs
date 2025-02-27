@@ -245,5 +245,4 @@
 	_ASM_EXTABLE_FAULT(.Lseamcall\@, .Lseamcall_trap\@)
 	_ASM_EXTABLE_TDX_MC(.Lafter_seamcall\@, .Lafter_nop\@)
 .endif	/* \host */
-
 .endm

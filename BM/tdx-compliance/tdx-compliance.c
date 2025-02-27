@@ -7,8 +7,8 @@
 #include <linux/kprobes.h>
 
 #include "asm/trapnr.h"
-#include "asm/tdx.h"
-#include "asm/shared/tdx.h"
+// #include "asm/tdx.h"
+// #include "asm/shared/tdx.h"
 
 #include "tdx-compliance.h"
 #include "tdx-compliance-cpuid.h"
@@ -606,14 +606,38 @@ u64 __tdx_hypercall(struct tdx_module_args *args)
         abort();
 
     if (args->r10)
-        printf("__tdx_hypercall err:\n"
-               "R10=0x%016lx, R11=0x%016lx, R12=0x%016lx\n"
-               "R13=0x%016lx, R14=0x%016lx, R15=0x%016lx\n",
+        printk("__tdx_hypercall err:\n"
+               "R10=0x%016llu, R11=0x%016llu, R12=0x%016llu\n"
+               "R13=0x%016llu, R14=0x%016llu, R15=0x%016llu\n",
                args->r10, args->r11, args->r12, args->r13, args->r14,
                args->r15);
 
     /* TDVMCALL leaf return code is in R10 */
     return args->r10;
+}
+
+u64 tdcall(u64 fn, struct tdx_module_args *args)
+{
+        u64 r;
+        r = __tdcall_ret(fn, args);
+        if (r)
+                panic("TDCALL %lld failed (Buggy TDX module!)\n", fn);
+        return r;
+}
+
+u64 tdg_vm_read(u64 field, u64 *val)
+{
+        u64 ret;
+        struct tdx_module_args arg = {
+                .rcx = 0,
+                .rdx = field,
+        };
+
+        ret =  __tdcall_ret(TDG_VM_RD, &arg);
+        if (!ret)
+                *val = arg.r8;
+
+        return ret;
 }
 
 u64 tdg_vm_write(u64 field, u64 val, u64 mask)
@@ -632,12 +656,13 @@ static void setup_tdcs_ctl(void)
 {
         struct tdx_module_args arg;
         u64 r;
+	u64 v;
         u64 mask;
         bool ve_reduce;
         bool vcpu_toplgy;
 
         arg.rdx = TDX_GLOBAL_FIELD_FEATURES0;
-        r = r = tdcall(TDG_SYS_RD, &arg);
+        r = tdcall(TDG_SYS_RD, &arg);
         if (r) {
                 printk("WARN: Failed to get TDX FEATURES0, err:0x%llu\n", r);
                 return;
@@ -647,13 +672,13 @@ static void setup_tdcs_ctl(void)
 
         r = tdg_vm_read(TDX_TDCS_FIELD_TD_CTL, &v);
         if (!r)
-                printk("TDX_TDCS_FILED_TD_CTL before set:0x%lx\n", v);
+                printk("TDX_TDCS_FILED_TD_CTL before set:0x%llu\n", v);
         else
                 printk("Failed to read TDX_TDCS_FILED_TD_CTL\n");
 
         r = tdg_vm_read(TDX_TDCS_FIELD_FEATURE_PV_CTL, &v);
         if (!r)
-                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL before set:0x%lx\n", v);
+                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL before set:0x%llu\n", v);
         else
                 printk("Failed to read TDX_TDCS_FIELD_FEATURE_PV_CTL\n");
 
@@ -682,7 +707,7 @@ static void setup_tdcs_ctl(void)
                         printk("TDX_TDCS_FIELD_FEATURE_PV_CTL set to 0x%llu failure, err:0x%llu\n",
                                tdcs_feature_pv_ctl, r);
         } else
-                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL is not supported or not set (tdcs_ctl=0x%lx)\n", tdcs_td_ctl);
+                printk("TDX_TDCS_FIELD_FEATURE_PV_CTL is not supported or not set (tdcs_ctl=0x%llu)\n", tdcs_td_ctl);
 
         r = tdg_vm_read(TDX_TDCS_FIELD_TD_CTL, &v);
         if (!r)
@@ -740,4 +765,5 @@ static void __exit tdx_tests_exit(void)
 
 module_init(tdx_tests_init);
 module_exit(tdx_tests_exit);
+
 MODULE_LICENSE("GPL");

@@ -9,7 +9,7 @@
  *
  * SPDX-License-Identifier: GPL-2.0
  */
-#include <errno.h>
+#include <linux/linkage.h>
 #include "tdxcall.S"
 
 /*
