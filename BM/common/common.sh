@@ -419,6 +419,28 @@ full_dmesg_check() {
   return 0
 }
 
+# check whole dmesg, which should not contain key words
+# Input $1: key word
+# Output: 0 for true, otherwise false or die
+dmesg_not_contain() {
+  local key_word=$1
+  local check_log=""
+  local dmesg_file=""
+  local hostname=""
+  local date=""
+
+  hostname=$(hostname);
+  date=$(date +%Y-%m-%d_%H_%M_%S);
+  dmesg_file="/root/${hostname}_${date}.txt"
+  check_log=$(dmesg | grep -i "$key_word")
+  if [[ -n "$check_log" ]]; then
+    do_cmd "dmesg > $dmesg_file"
+    die "Dmesg $dmesg_file contained '$key_word':$check_log"
+  else
+    test_print_trc "Dmesg didn't contain '$key_word':$check_log"
+  fi
+}
+
 # Record last timestamp in dmesg and store the value in variable
 # LAST_DMESG_TIMESTAMP. The value is refered in function extract_case_dmesg.
 last_dmesg_timestamp() {
