@@ -10,6 +10,7 @@
 from avocado.utils import cpu
 from virttest import env_process
 from virttest import error_context
+from provider import utils_misc
 
 
 @error_context.context_aware
@@ -44,4 +45,5 @@ def run(test, params, env):
     memory = params.get_numeric("mem")
     if vm.get_totalmem_sys()//1024 != memory:
         test.fail("Memory in guest is not same as configured")
+    utils_misc.verify_dmesg()
     session.close()
