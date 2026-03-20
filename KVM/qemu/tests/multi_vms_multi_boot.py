@@ -10,6 +10,7 @@ from virttest import env_process
 from virttest import error_context
 from virttest import utils_misc
 from provider import dmesg_router  # pylint: disable=unused-import
+from provider import ip_sniff_patch  # pylint: disable=unused-import
 
 LOG = logging.getLogger("avocado.test")
 
