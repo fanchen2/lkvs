@@ -14,6 +14,15 @@ from provider import dmesg_router  # pylint: disable=unused-import
 LOG = logging.getLogger("avocado.test")
 
 
+def _prepare_auto_calc_guest_count(params):
+    """Generate vm list for auto_calc_guest_count mode."""
+    guest_mem = int(params.get_numeric("mem", params.get_numeric("start_mem", 1024)))
+    host_usable_mem = int(utils_misc.get_usable_memory_size())
+    guest_num = host_usable_mem // guest_mem
+    vm_names = ["vm%s" % idx for idx in range(1, guest_num + 1)]
+    params["vms"] = " ".join(vm_names)
+
+
 def _calc_default_mem_series(params, vm_names):
     """
     Calculate a default memory series based on the generator type.
@@ -21,6 +30,7 @@ def _calc_default_mem_series(params, vm_names):
     Supported generators:
       - linear: increments by mem_step from start_mem to memory_limit
       - random_32g_window: random samples within sliding 32G windows
+    Note: auto_calc_guest_count preparation is handled outside this function.
     """
     # Supported: "linear" (default fallback) or "random_32g_window" (used by current cfg)
     mem_generator = params.get("mem_generator", "linear")
@@ -136,9 +146,22 @@ def run(test, params, env):
 
     timeout = int(params.get_numeric("login_timeout", 240))
 
+    auto_calc_guest_count = params.get("auto_calc_guest_count", "no") == "yes"
     vm_names = params.objects("vms")
-    if not vm_names:
+    # If auto_calc_guest_count is disabled, vms must be explicitly configured
+    if not vm_names and not auto_calc_guest_count:
         test.cancel("No VMs configured for multi_vms_multi_boot")
+    # Validate auto_calc_guest_count requirements
+    if auto_calc_guest_count:
+        guest_mem = int(params.get_numeric("mem", params.get_numeric("start_mem", 1024)))
+        host_usable_mem = int(utils_misc.get_usable_memory_size())
+        if host_usable_mem < guest_mem:
+            test.fail(
+                "Not enough usable host memory for auto_calc_guest_count. "
+                "required=%dM usable=%dM" % (guest_mem, host_usable_mem)
+            )
+        _prepare_auto_calc_guest_count(params)
+        vm_names = params.objects("vms")
 
     iteration_plan = _resolve_iteration_plan(params, vm_names)
 
