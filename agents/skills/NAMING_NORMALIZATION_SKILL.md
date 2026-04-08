@@ -15,7 +15,7 @@ Use this skill when:
 1. **Legacy Case Names** (from vmm_tree)
    - List of cases to migrate
    - Case family/group (memory sweep, repeat boot, functional, etc.)
-   - Extracted semantics (from VMWARE_LEGACY_CASE_ANALYSIS_SKILL)
+   - Extracted semantics (from VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL)
 
 2. **LKVS Naming Conventions** (existing patterns)
    - Review existing KVM/qemu case names
@@ -309,6 +309,6 @@ validation:
 ```
 
 ## Related Skills
-- **VMWARE_LEGACY_CASE_ANALYSIS_SKILL**: Provides case semantics for naming
+- **VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL**: Provides case semantics for naming
 - **LKVS_CFG_TRANSLATION_SKILL**: Uses normalized names in cfg structure
 - **LKVS_PARAMETER_MAPPING_SKILL**: Works with named variants to map parameters

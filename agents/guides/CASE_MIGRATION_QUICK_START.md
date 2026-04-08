@@ -2,7 +2,7 @@
 name: Case Migration Quick Start
 description: Hands-on guide to migrate test cases from vmm_tree to LKVS
 related_skills:
-  - ../skills/VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md
+  - ../skills/VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md
   - ../skills/LKVS_PARAMETER_MAPPING_SKILL.md
   - ../skills/NAMING_NORMALIZATION_SKILL.md
   - ../skills/LKVS_CFG_TRANSLATION_SKILL.md
@@ -30,7 +30,7 @@ agents/case_migration_framework.agent.md       ← Main coordination agent
     └── Phase 4: Validation & Commit
 
 Supported Skills (specializations):
-├── skills/VMWARE_LEGACY_CASE_ANALYSIS_SKILL        ← Decode legacy case semantics
+├── skills/VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL        ← Decode legacy case semantics
 ├── skills/LKVS_PARAMETER_MAPPING_SKILL             ← Build parameter equivalence table
 ├── skills/NAMING_NORMALIZATION_SKILL               ← Standardize case names
 ├── skills/LKVS_CFG_TRANSLATION_SKILL               ← Translate to cartograph format
@@ -44,7 +44,7 @@ Supported Skills (specializations):
 **Time estimate**: 1-2 hours per case (includes research + implementation)
 
 ### Step 1: Analyze the Legacy Case (30 min)
-**Use Skill**: [VMWARE_LEGACY_CASE_ANALYSIS_SKILL](../skills/VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md)
+**Use Skill**: [VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL](../skills/VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md)
 
 ```bash
 # Find legacy case in vmm_tree
@@ -244,8 +244,7 @@ Before committing any migration, verify:
 
 ### How This Relates to Other Agents
 
-- **boot_repeat_case_refactor.agent.md**: Focuses on cfg hierarchy within LKVS (this framework feeds into it)
-- **multi_vms_memory_sweep.agent.md**: Aligns specific sweep implementations (this framework may reference it)
+- **case_migration_framework.agent.md**: Single coordination agent for boot repeat and memory sweep migrations
 
 ### Commit Message Style
 

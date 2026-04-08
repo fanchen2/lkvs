@@ -101,7 +101,7 @@ Each skill is a **specialized workflow** focused on one migration aspect. They a
 - **Composable** (combined by main agent)
 - **Referenced in documentation** (agent points to relevant skill)
 
-#### Skill 1: `VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md`
+#### Skill 1: `VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md`
 
 **Purpose**: Reverse-engineer legacy case semantics
 
@@ -423,7 +423,7 @@ When migrating entire vmm_tree test suite over months:
 
 | Situation | Skill | Why |
 |-----------|-------|-----|
-| "What does this legacy case do?" | [VMWARE_LEGACY_CASE_ANALYSIS](../skills/VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md) | Decode intent + semantics |
+| "What does this legacy case do?" | [VMM_TREE_LEGACY_CASE_ANALYSIS](../skills/VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md) | Decode intent + semantics |
 | "How do I map legacy params to LKVS?" | [LKVS_PARAMETER_MAPPING](../skills/LKVS_PARAMETER_MAPPING_SKILL.md) | Build equivalence table |
 | "What should I name this in LKVS?" | [NAMING_NORMALIZATION](../skills/NAMING_NORMALIZATION_SKILL.md) | Standardize; avoid conflicts |
 | "How do I write LKVS cfg for this?" | [LKVS_CFG_TRANSLATION](../skills/LKVS_CFG_TRANSLATION_SKILL.md) | Translate structure + params |

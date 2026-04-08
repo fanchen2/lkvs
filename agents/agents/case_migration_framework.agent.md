@@ -7,7 +7,7 @@ description: Systematically migrate virtualization test cases from vmm_tree to L
 
 ## Linked Resources
 - Skills:
-   - [VMWARE_LEGACY_CASE_ANALYSIS_SKILL](../skills/VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md)
+   - [VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL](../skills/VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md)
    - [LKVS_PARAMETER_MAPPING_SKILL](../skills/LKVS_PARAMETER_MAPPING_SKILL.md)
    - [NAMING_NORMALIZATION_SKILL](../skills/NAMING_NORMALIZATION_SKILL.md)
    - [LKVS_CFG_TRANSLATION_SKILL](../skills/LKVS_CFG_TRANSLATION_SKILL.md)
@@ -15,6 +15,7 @@ description: Systematically migrate virtualization test cases from vmm_tree to L
 - Guides:
    - [CASE_MIGRATION_QUICK_START](../guides/CASE_MIGRATION_QUICK_START.md)
    - [CASE_MIGRATION_ARCHITECTURE](../guides/CASE_MIGRATION_ARCHITECTURE.md)
+   - [CASE_MIGRATION_CASE_PATTERNS](../guides/CASE_MIGRATION_CASE_PATTERNS.md)
 
 ## Goal
 Systematically migrate virtualization test cases from `vmm_tree` (legacy infrastructure) to LKVS (modern QEMU test provider) while preserving behavior and aligning with target project conventions.
@@ -28,12 +29,11 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
 - Enforces LKVS coding style, licensing, and structure
 - Documents migration pathways for future maintainers
 
-## Example Migration Flow
-Legacy case `tdx_vmx2_from1024m_toall` in vmm_tree translates to:
-- **LKVS target**: `boot_repeat.one_vm_repeat.memory_sweep.1td.from1G_toall`
-- **Semantics preserved**: memory sweep from 1GB to all available memory
-- **VM type**: TDX confidential VM (1TD)
-- **Execution model**: repeated boot/destroy cycles with varying memory sizes
+## Case-Specific References
+- Keep case-family routing, naming quirks, and handler-specific constraints in companion guides instead of the core framework.
+- Promote a lesson back into this framework only after it has been validated across multiple migrations or clearly applies beyond one case family.
+- Use [CASE_MIGRATION_CASE_PATTERNS](../guides/CASE_MIGRATION_CASE_PATTERNS.md) for extracted notes such as boot-repeat memory sweeps and large multi-VM scaling cases.
+- Read TD-extension guidance only when the task explicitly asks to add a TD variant for an existing VM case; do not pull TD-specific rules into unrelated migrations by default.
 
 ## Key Principles
 
@@ -42,12 +42,18 @@ Legacy case `tdx_vmx2_from1024m_toall` in vmm_tree translates to:
 - If legacy behavior requires workarounds, preserve them in comments
 - Test-observable behavior (pass/fail criteria, iterative sequences) must match legacy baseline
 
+### 1.1 Mandatory Post-Change Review
+- Every code change must be reviewed immediately after editing.
+- Review focus: behavior correctness, parameter usage consistency, and side-effect scope.
+- Review must explicitly check for duplicated logic and redundant branches.
+- If duplicate/redundant code is found, refactor to a single clear path before finalizing.
+- Default preference is concise code: keep implementation minimal while preserving readability.
+
 ### 2. Naming Normalization
 - Convert legacy snake_case names to LKVS conventions
 - Document mapping in commits and agent checklists
-- Example: `tdx_vmx2_from1024m_toall` → `1td.from1G_toall`
-  - `tdx_vmx2` → `1td` (one TDX VM)
-  - `from1024m_toall` → `from1G_toall` (memory range in LKVS units: GB start)
+- Normalize names around stable semantic segments such as VM topology, execution mode, and parameter intent.
+- When units are normalized during renaming, record the old and new units in the mapping table so the name change remains traceable.
 
 ### 3. Project-Aware Configuration
 - **vmm_tree perspective**: legacy, infrastructure-coupled, minimal disruption
@@ -65,19 +71,26 @@ Legacy case `tdx_vmx2_from1024m_toall` in vmm_tree translates to:
 ## Migration Workflow (Per Case Group)
 
 ### Phase 1: Case Analysis & Mapping
-1. **Identify legacy case group** (e.g., memory-sweep family)
+1. **Identify legacy case group**
    - Find all related vmm_tree cfg lines
    - Extract parameters (iterations, memory ranges, VM types)
    - Document legacy naming convention
    - Identify execution model (cfg type, test handler)
 
-2. **Build parameter mapping**
+2. **Locate case definition by case name (do not start with repo-wide grep)**
+   - Use `validation/xvs/src/src/TestSuites/<suite>/tet_scen` as the source of truth.
+   - Search exact case name in `tet_scen`, then read the next non-comment line to get `/suite/ts1.sh{N}`.
+   - Open `validation/xvs/src/src/TestSuites/<suite>/<suite>/ts1.sh`, map `{N}` to `icN`, then map `icN` to `tpN`.
+   - If the case has per-case inputs, check `validation/xvs/src/src/TestSuites/<suite>/<suite>/param.json` with the same case key.
+   - Use repo-wide grep only as a fallback when suite information is genuinely unknown.
+
+3. **Build parameter mapping**
    - List legacy parameters and their types/ranges
    - Identify LKVS equivalents in existing cfg/Python
    - Mark any missing parameters (may require new fields)
    - Note parameter transformations (e.g., unit changes: MiB → GiB)
 
-3. **Create naming table**
+4. **Create naming table**
    - Old name → New name mapping
    - Document naming logic (VM count, memory strategy, etc.)
    - Ensure names are descriptive and stable
@@ -86,6 +99,7 @@ Legacy case `tdx_vmx2_from1024m_toall` in vmm_tree translates to:
 1. **Locate target cfg file** in LKVS `KVM/qemu/`
    - Choose file based on test feature (boot_repeat, multi_vms, etc.)
    - Preserve existing structure; add new variants inline
+   - If the request explicitly includes adding a TD version for a VM case, consult the LKVS repository instruction for VM-to-TD extension rules before editing cfg.
 
 2. **Translate cfg hierarchy**
    - Map legacy case group to LKVS variant structure
@@ -118,14 +132,15 @@ Legacy case `tdx_vmx2_from1024m_toall` in vmm_tree translates to:
    - No lint errors: `pre-commit run --files <touched_files>`
    - CFG structure integrity: no corruption, correct indentation
    - Parameter alignment: all references match cfg
+   - Code review pass: no unnecessary duplication, no dead/redundant logic
 
 2. **Behavioral validation**:
-   - Document expected test behavior (e.g., "boot TD 10 times with varying memory")
+   - Document expected test behavior in observable terms such as iteration count, VM type, variable under test, and cleanup expectations.
    - Note any differences from legacy (if unavoidable)
    - Add links to legacy case for future reference
 
 3. **Commit with full context**:
-   - Use migration-focused scope: e.g., `KVM/qemu: migrate memory sweep cases from vmm_tree`
+   - Use migration-focused scope: e.g., `KVM/qemu: migrate <case_family> cases from vmm_tree`
    - Include mapping table or summary in body
    - Reference vmm_tree location (e.g., `Migrated from vmm_tree/validation/...`)
    - Document any behavior changes or approximations
@@ -168,41 +183,26 @@ Legacy case `tdx_vmx2_from1024m_toall` in vmm_tree translates to:
 ### Common Pitfall 5: Parameter Inheritance in cfg
 - **Risk**: Custom parameter names (e.g., `guest_mem`) don't apply to all auto-generated VMs
 - **Mitigation**: Use standard LKVS parameters (e.g., `mem`) and ensure runtime per-VM overrides are built from resolved VM list
-- **Example**: Auto-calc mode should use `mem = 1024` for input and generate iteration overrides for every resolved VM; avoid relying on custom params like `guest_mem`
+- **Example**: In dynamic multi-VM flows, prefer inherited parameters such as `mem` for shared boot settings and generate per-VM overrides only when the case truly needs them
 - **Pattern**: VM-specific params like `mem_vm1`, `mem_vm2` require explicit cfg entries; generic params like `mem` auto-inherit
 - **Validation**: For dynamic VM list, test that all VMs (vm1, vm2, vm3+) receive intended memory value
 
-### Lessons From `many_vm_1G` Case (April 2026)
+### Reusable Lessons From Scaled Multi-VM Cases
 
-**Context**: Added many_vm_1G variant to LKVS with auto-calculated VM count based on host memory.
+1. **Separate Runtime Values From Sizing Values**
+   - Keep the boot-time parameter distinct from any derived value used for capacity planning or guest-count calculation.
 
-**Issue**: First two VMs used correct 1024MB, but vm3+ fell back to 4096MB default.
+2. **Centralize Derived-Value Logic**
+   - Put sizing or auto-calculation logic in one helper path and let the main run flow consume its result instead of repeating the math.
 
-**Root Cause**: Used custom `guest_mem` parameter with memory series normalization; only VM1/VM2 had explicit `mem_vm1`/`mem_vm2` cfg entries.
+3. **Apply Safety Bounds Explicitly**
+   - Cap automatically derived counts or sizes with explicit limits so the case stays predictable on large hosts.
 
-**Solution**: Use standard LKVS `mem` parameter, generate VM list before iteration planning, and apply per-VM memory overrides from the iteration plan.
+4. **Keep Host Tuning Process-Scoped**
+   - Apply temporary host resource tuning only inside the test process and always restore it in `finally`.
 
-**Key Learnings**:
-
-1. **Parameter Naming Convention Matters**
-   - **Standard params** (e.g., `mem`, `cpu`, `machine_type`): Apply globally to all VMs; inherited by `params.object_params(vm_name)`
-   - **VM-specific params** (e.g., `mem_vm1`, `cpu_vm2`): Only apply if explicitly configured; falls back to standard param if not set
-   - **Custom params** (e.g., `guest_mem`, `start_mem`): Used for helper function input; don't auto-inherit; require explicit handling
-   - **Decision**: Prefer standard params over custom ones to leverage cfg inheritance framework
-
-2. **Parameter Inheritance Chain in LKVS**
-   - When test does `params.object_params("vm3")` on vm3 that has no custom `mem_vm3` entry:
-     - Returns cfg values inherited from parent sections (e.g., variant → test family → global)
-     - Uses global `mem` parameter if set
-     - Falls back to hardcoded defaults (e.g., 4096MB) if neither set
-   - **Validation**: Always test with multiple VMs (vm1, vm2, vm3+) to catch inheritance gaps
-   - **Implementation Note**: For auto-generated VM lists, refresh `vm_names` after generation and before building iteration plan
-
-3. **Fixed Memory Series Anti-Pattern**
-   - **Temptation**: When all VMs should use same memory, normalize `start_mem` / `max_mem` / `mem_step` to fixed value
-   - **Problem**: Creates memory "series" of length 1; overcomplicates cfg; doesn't address core inheritance issue
-   - **Solution**: Skip memory series normalization; keep `mem` as standard input and build explicit per-VM overrides from the iteration plan
-   - **Outcome**: Single-iteration fixed-memory behavior remains clear without extra inheritance workarounds
+5. **Use Explicit Parameter Names**
+   - Prefer names that distinguish actual runtime settings from derived planning inputs.
 
 ## Validation Checklist
 
@@ -211,6 +211,9 @@ Legacy case `tdx_vmx2_from1024m_toall` in vmm_tree translates to:
 - [ ] **Naming convention** documented and applied consistently
 - [ ] **CFG translated** and structure validated (indentation, nesting)
 - [ ] **Python handler** verified (if new) or existing one checked for completeness
+- [ ] **Post-edit code review done** (correctness + side effects + readability)
+- [ ] **Duplication minimized** (no repeated logic blocks when one shared path is enough)
+- [ ] **Code kept concise** (remove redundant branches/variables/comments)
 - [ ] **License header** added (GPL-2.0-only + Intel copyright) if new file
 - [ ] **Pre-commit** passes on modified files
 - [ ] **Commit message** includes source reference and mapping summary
@@ -259,34 +262,13 @@ Signed-off-by: <name> <email>
 - Mention handler extension or implementation pattern used
 - List supported variant types (vm, td, etc.)
 
-### Example: many_vm_1G Case (April 2026)
-
-```
-KVM: add many_vm_1G case to multi_vms tests
-
-Add many_vm_1G variant that auto-calculates VM count from available host memory.
-Each VM uses fixed 1024MB; guest_num = usable_memory // 1024.
-
-Extended multi_vms_multi_boot handler with auto_calc_guest_count mode.
-
-Signed-off-by: <name> <email>
-```
-
-**Notes on this example**:
-- Simple, single-case addition (not bulk migration)
-- Belongs to `multi_vms` family (not `boot_repeat` family)
-- Focuses on new capability rather than legacy source reference
-- Emphasizes implementation pattern (handler extension) over naming details
-- Omits verbose parameter mapping since behavior is self-explanatory
-- Suitable for submissions that don't require full vmm_tree traceability
-
 ## Agent Coordination
 
 This agent works in tandem with:
 - **[LKVS_CFG_TRANSLATION_SKILL](../skills/LKVS_CFG_TRANSLATION_SKILL.md)**: Handles cartograph translation rules
 - **[LKVS_PARAMETER_MAPPING_SKILL](../skills/LKVS_PARAMETER_MAPPING_SKILL.md)**: Documents parameter equivalence
 - **[LKVS_TEST_IMPLEMENTATION_SKILL](../skills/LKVS_TEST_IMPLEMENTATION_SKILL.md)**: Guides Python test creation/modification
-- **[VMWARE_LEGACY_CASE_ANALYSIS_SKILL](../skills/VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md)**: Extracts legacy case semantics
+- **[VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL](../skills/VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md)**: Extracts legacy case semantics
 - **[NAMING_NORMALIZATION_SKILL](../skills/NAMING_NORMALIZATION_SKILL.md)**: Standardizes case names across projects
 
 See [Quick Start Guide](../guides/CASE_MIGRATION_QUICK_START.md) and [Architecture Doc](../guides/CASE_MIGRATION_ARCHITECTURE.md) for detailed workflows.
