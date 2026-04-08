@@ -406,4 +406,4 @@ from provider import dmesg_router  # pylint: disable=unused-import
 ## Related Skills
 - **LKVS_PARAMETER_MAPPING_SKILL**: Provides parameter mapping table
 - **LKVS_CFG_TRANSLATION_SKILL**: Produces cfg that drives test execution
-- **VMWARE_LEGACY_CASE_ANALYSIS_SKILL**: Explains legacy behavior to replicate
+- **VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL**: Explains legacy behavior to replicate

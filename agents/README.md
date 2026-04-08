@@ -5,12 +5,10 @@
 ```
 agents/
 ├── agents/                                          ← Agent定义
-│   ├── boot_repeat_case_refactor.agent.md          
-│   ├── multi_vms_memory_sweep.agent.md             
 │   └── case_migration_framework.agent.md           ← 主协调agent
 │
 ├── skills/                                          ← 可复用技能库
-│   ├── VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md       ① 分析legacy case语义
+│   ├── VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md       ① 分析legacy case语义
 │   ├── LKVS_PARAMETER_MAPPING_SKILL.md            ② 构建参数映射表
 │   ├── NAMING_NORMALIZATION_SKILL.md              ③ 命名规范化
 │   ├── LKVS_CFG_TRANSLATION_SKILL.md              ④ cfg配置翻译
@@ -32,7 +30,7 @@ agents/
 
 | 任务 | 对应Skill |
 |------|-----------|
-| 理解legacy case的语义 | [VMWARE_LEGACY_CASE_ANALYSIS_SKILL](skills/VMWARE_LEGACY_CASE_ANALYSIS_SKILL.md) |
+| 理解legacy case的语义 | [VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL](skills/VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md) |
 | 处理参数单位转换、映射 | [LKVS_PARAMETER_MAPPING_SKILL](skills/LKVS_PARAMETER_MAPPING_SKILL.md) |
 | 统一case命名规范 | [NAMING_NORMALIZATION_SKILL](skills/NAMING_NORMALIZATION_SKILL.md) |
 | 编写LKVS cfg配置 | [LKVS_CFG_TRANSLATION_SKILL](skills/LKVS_CFG_TRANSLATION_SKILL.md) |
@@ -40,8 +38,8 @@ agents/
 
 ### 修改现有配置
 
-- **Boot repeat相关** → 参考 [boot_repeat_case_refactor.agent.md](agents/boot_repeat_case_refactor.agent.md)
-- **Memory sweep相关** → 参考 [multi_vms_memory_sweep.agent.md](agents/multi_vms_memory_sweep.agent.md)
+- **Boot repeat相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
+- **Memory sweep相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
 
 ## 关键特点
 
@@ -66,7 +64,7 @@ agents/
 1️⃣  打开 guides/CASE_MIGRATION_QUICK_START.md
     ↓ (告诉你需要哪个skill)
 
-2️⃣  运行 SKILL 1: VMWARE_LEGACY_CASE_ANALYSIS_SKILL
+2️⃣  运行 SKILL 1: VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL
     ↓ (产出: legacy case语义)
 
 3️⃣  运行 SKILL 2: LKVS_PARAMETER_MAPPING_SKILL
@@ -96,7 +94,7 @@ A: 读 [Architecture Guide](guides/CASE_MIGRATION_ARCHITECTURE.md)
 A: 使用 [LKVS_PARAMETER_MAPPING_SKILL](skills/LKVS_PARAMETER_MAPPING_SKILL.md)
 
 **Q: 现有的boot_repeat case需要调整，怎么做？**
-A: 参考 [boot_repeat_case_refactor.agent.md](agents/boot_repeat_case_refactor.agent.md)
+A: 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
 
 ---
 

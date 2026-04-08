@@ -25,23 +25,32 @@ Use this skill when:
 ## Process
 
 ### Step 1: Locate Legacy Case Definition
-- Find vmm_tree cfg file (typically under `validation/kvm_pts/` or `validation/vmm-pts/`)
-- Identify case name and its enclosing variant blocks
-- Extract raw parameter definitions
-- Note file path and line numbers for traceability
+- Prefer a `TestSuites/tet_scen` lookup path over repo-wide grep.
+- Start from `validation/xvs/src/src/TestSuites/<suite>/tet_scen` and search for the exact case name.
+- Read the next non-comment line to get the mapped script/index form `/suite/ts1.sh{N}`.
+- Open `validation/xvs/src/src/TestSuites/<suite>/<suite>/ts1.sh` and resolve `{N}` by mapping `icN` to `tpN`.
+- If case-level parameters exist, check `validation/xvs/src/src/TestSuites/<suite>/<suite>/param.json` using the same case key.
+- Use repo-wide grep only as a fallback when suite information is unavailable.
 
-Example search:
-```bash
-# Find case in vmm_tree
-grep -r "tdx_vmx2_from1024m_toall" vmm_tree/validation/
-
-# Likely found in:
-# vmm_tree/validation/kvm_pts/boot_repeat.cfg
+Example mapping path:
+```text
+Case: many_vmx_1024m
+tet_scen entry: many_vmx_1024m -> /memory/ts1.sh{16}
+ts1.sh mapping: ic16="tp16"
+parameter key: "many_vmx_1024m" in memory/param.json
 ```
 
-Output location:
-```
-vmm_tree/validation/kvm_pts/boot_repeat.cfg, lines 42-70
+Quick lookup commands (PowerShell):
+```powershell
+# Find case definition line in all tet_scen files
+Get-ChildItem -Path validation/xvs/src/src/TestSuites -Recurse -File -Filter tet_scen |
+  Select-String -Pattern "^<case_name>\s*$"
+
+# Resolve ic index mapping in suite script
+Select-String -Path "validation/xvs/src/src/TestSuites/<suite>/<suite>/ts1.sh" -Pattern "^ic<ic_index>=|^iclist="
+
+# Resolve case-level parameter block
+Select-String -Path "validation/xvs/src/src/TestSuites/<suite>/<suite>/param.json" -Pattern '"<case_name>"'
 ```
 
 ### Step 2: Extract Raw Parameters

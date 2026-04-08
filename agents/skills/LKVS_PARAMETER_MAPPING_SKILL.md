@@ -277,6 +277,6 @@ Action: Parse legacy; create 2 LKVS params
 ```
 
 ## Related Skills
-- **VMWARE_LEGACY_CASE_ANALYSIS_SKILL**: Extracts legacy parameter semantics
+- **VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL**: Extracts legacy parameter semantics
 - **LKVS_CFG_TRANSLATION_SKILL**: Uses mapping table to translate cfg
 - **LKVS_TEST_IMPLEMENTATION_SKILL**: Verifies Python test reads mapped parameters
