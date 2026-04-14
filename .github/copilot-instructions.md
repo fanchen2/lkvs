@@ -119,6 +119,7 @@ Signed-off-by: Name <email>
 - Scope examples: `boot_repeat`, `KVM/qemu`, `BM/tdx-guest`
 - Summary: concise, imperative, lowercase after scope
 - Always include `Signed-off-by` (use `git commit -s`)
+- For non-Markdown changes under `KVM/qemu/`, use `KVM:` or `KVM/qemu:` as commit scope (do not use test-file names as scope)
 - Amend commits only when the user explicitly requests it (for example, `git commit --amend --no-edit` while fixing up the same logical change)
 
 ## Common Pitfalls
