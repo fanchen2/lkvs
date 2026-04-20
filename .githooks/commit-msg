@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Enforce LKVS commit message format and KVM scope conventions.
+# Install once per clone:
+#   git config core.hooksPath .githooks
+
+MSG_FILE="$1"
+SUBJECT="$(sed -n '1p' "$MSG_FILE")"
+
+# Generic format: <scope>: <summary>
+if ! printf '%s' "$SUBJECT" | grep -Eq '^[A-Za-z0-9._/-]+: .+'; then
+    echo "ERROR: commit subject must match '<scope>: <summary>'"
+    echo "Current: $SUBJECT"
+    exit 1
+fi
+
+# Require signed-off-by line (expected when using git commit -s)
+if ! grep -Eiq '^Signed-off-by:[[:space:]]+.+<.+>$' "$MSG_FILE"; then
+    echo "ERROR: missing Signed-off-by line (use: git commit -s)"
+    exit 1
+fi
+
+# If staged files touch non-Markdown files under KVM/qemu/, enforce KVM scope.
+if git diff --cached --name-only | grep -E '^KVM/qemu/' | grep -Ev '\.md$' >/dev/null; then
+    if ! printf '%s' "$SUBJECT" | grep -Eq '^(KVM|KVM/qemu): '; then
+        echo "ERROR: non-Markdown KVM/qemu changes require subject scope 'KVM:' or 'KVM/qemu:'"
+        echo "Current: $SUBJECT"
+        exit 1
+    fi
+fi
+
+exit 0
