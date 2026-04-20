@@ -6,6 +6,7 @@
 agents/
 ├── agents/                                          ← Agent定义
 │   └── case_migration_framework.agent.md           ← 主协调agent
+│   └── avocado_case_runner.agent.md                ← 用例执行agent（先bootstrap，再改case名执行）
 │
 ├── skills/                                          ← 可复用技能库
 │   ├── VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md       ① 分析legacy case语义
@@ -25,6 +26,7 @@ agents/
 1. **首次使用** → 阅读 [Quick Start Guide](guides/CASE_MIGRATION_QUICK_START.md)
 2. **理解架构** → 阅读 [Architecture Guide](guides/CASE_MIGRATION_ARCHITECTURE.md)
 3. **运行agent** → 使用 [Main Agent](agents/case_migration_framework.agent.md)
+4. **执行指定case** → 使用 [Avocado Case Runner](agents/avocado_case_runner.agent.md)
 
 ### 具体任务
 
@@ -40,6 +42,7 @@ agents/
 
 - **Boot repeat相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
 - **Memory sweep相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
+- **按固定流程执行单个case（先 `avocado vt-bootstrap --vt-type qemu`）** → 参考 [avocado_case_runner.agent.md](agents/avocado_case_runner.agent.md)
 
 ## 关键特点
 
