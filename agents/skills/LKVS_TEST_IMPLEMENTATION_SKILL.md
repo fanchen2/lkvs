@@ -403,6 +403,59 @@ finally:
 from provider import dmesg_router  # pylint: disable=unused-import
 ```
 
+### Pitfall 5: Adding Unused Fallback Branches or Dead Helper Functions
+
+Do **not** add speculative fallback code paths or helper functions that are not actually used by any current test case variant.
+
+**Rationale**: Dead code branches and unused helper functions:
+- Increase cognitive load and maintenance burden
+- Create confusion about intended behavior (is this code path actually exercised?)
+- May silently change behavior in future refactors if someone adds a call without realizing it's untested
+- Create false expectations about API flexibility
+
+**Examples**:
+
+```python
+# ✗ Bad: `auto` mode branch is never called in current ratelimit validation
+def _extract_second_from_dmesg(line, timestamp_mode="auto"):
+    # ... parsing logic ...
+    if timestamp_mode == "auto":  # NEVER CALLED by current cases
+        if boot_second is not None:
+            return boot_second
+        return hms_second
+    return None
+
+# ✓ Good: only support modes actually used
+def _extract_second_from_dmesg(line, timestamp_mode):  # required, not optional
+    """Extract second from dmesg timestamp.
+    
+    :param timestamp_mode: parsing mode: "boot" or "hms".
+    """
+    # ... parsing logic ...
+    if timestamp_mode == "boot":
+        return boot_second
+    if timestamp_mode == "hms":
+        return hms_second
+    return None
+
+# ✗ Bad: helper function with no current call sites
+def _count_same_second_traps(lines, timestamp_mode):
+    """Count lines sharing the first line's second."""
+    # Implementation exists but never called by any test variant
+    pass
+
+# ✓ Good: delete it; add it back when a case actually needs it
+```
+
+**When to Add Support**: Add a feature or helper function **only** when:
+1. An existing or newly written test case requires it, **or**
+2. You are explicitly building a shared utility intended for multi-case reuse with documented callers.
+
+**Code Review Check**: Before finalizing a test implementation:
+- Scan for functions with no call sites: `grep -n "^def " | grep -v "@"` then search each function name
+- Remove any unreached branches (e.g., conditional code never satisfied by case parameters)
+- Document any fallback modes with explicit "TODO: used by [case_name]" or remove them
+
 ## Related Skills
 - **LKVS_PARAMETER_MAPPING_SKILL**: Provides parameter mapping table
 - **LKVS_CFG_TRANSLATION_SKILL**: Produces cfg that drives test execution

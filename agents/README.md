@@ -48,6 +48,7 @@ agents/
 
 - `KVM:`: for changes under `KVM/` and related KVM test logic/config updates
 - `agents:`: for changes under `agents/` and agent documentation/workflow updates
+- If a commit only touches agent-side assets (for example `agents/` and related agent guidance files), the commit subject must start with `agents:`.
 
 ## 关键特点
 

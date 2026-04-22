@@ -129,4 +129,5 @@ Signed-off-by: Name <email>
 - Do not remove side-effect imports like `from provider import dmesg_router  # pylint: disable=unused-import` unless you verified logging routing behavior is unchanged.
 - Do not create a separate Python test just because a VM case needs a TD variant; in LKVS this is usually a cfg split on top of the same handler.
 - Do not apply TDX parameters globally when only one guest in a mixed topology should be TD; use suffixed params such as `vm_secure_guest_type_vm2`.
+- Do not place TDX-specific parameters (e.g. `bus_lock_source_file_tdx`) in the common section of a cfg file. Parameters defined outside any `variants:` block are visible to **all** variants. If the Python side uses `params.get("key_tdx", params["key"])` for fallback, the fallback will never trigger when `key_tdx` exists in the common scope, causing non-TDX variants to silently pick up the TDX value. Always scope TDX-only parameters inside the `td:` variant block.
 - Do not rename the VM branch while adding TD support unless the surrounding cfg already uses paired naming that requires it.
