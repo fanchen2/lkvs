@@ -42,7 +42,12 @@ agents/
 
 - **Boot repeat相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
 - **Memory sweep相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
-- **按固定流程执行单个case（先 `avocado vt-bootstrap --vt-type qemu`）** → 参考 [avocado_case_runner.agent.md](agents/avocado_case_runner.agent.md)
+- **按固定流程执行单个case（先 `avocado vt-bootstrap --vt-type qemu`）** → 参考 [avocado_case_runner.agent.md](agents/avocado_case_runner.agent.md)。case 名必须写成 cfg 里的短过滤名，例如 `vmdos_buslock_de.vm.VMDOS_buslock_de_01`，不要改成 `type_specific.myprovider...` 之类的全限定名。
+
+### Commit Prefix Rules
+
+- `KVM:`: for changes under `KVM/` and related KVM test logic/config updates
+- `agents:`: for changes under `agents/` and agent documentation/workflow updates
 
 ## 关键特点
 
