@@ -197,6 +197,29 @@ Translated cfg block ready to insert into target file:
 
 - Mitigation: For quoted values, standardize on double quotes across translated blocks
 
+6. **TDX-Only Parameters in Common Scope**: Placing TDX-specific parameters (e.g. `bus_lock_source_file_tdx`, `vm_secure_guest_type`) outside any `variants:` block makes them visible to **all** variants, including `vm`.
+
+- When the Python side uses `params.get("key_tdx", params["key"])` for fallback, the fallback will **never** trigger if `key_tdx` is in the common scope, causing non-TDX variants to silently use the TDX value.
+- Mitigation: Always scope TDX-only parameters inside the `td:` variant block, never in the common section.
+
+```properties
+# Wrong: bus_lock_source_file_tdx visible to vm variant too
+bus_lock_source_file = bus_lock.c
+bus_lock_source_file_tdx = bus_lock_64.c   # <- common scope, affects vm!
+variants:
+    - vm:
+    - td:
+        vm_secure_guest_type = tdx
+
+# Correct: TDX parameter scoped inside td: only
+bus_lock_source_file = bus_lock.c
+variants:
+    - vm:
+    - td:
+        vm_secure_guest_type = tdx
+        bus_lock_source_file_tdx = bus_lock_64.c   # <- td scope only
+```
+
 ## Related Skills
 
 - **LKVS_PARAMETER_MAPPING_SKILL**: Provides parameter translation table input
