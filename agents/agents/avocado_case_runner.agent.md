@@ -29,15 +29,28 @@ Edit only the `only ...` line under `variants -> @run_test` in `tdx_temp.cfg`.
 Current example:
 
 ```cfg
-only vmdos_buslock_de.td.VMDOS_buslock_de_04
+only vmdos_buslock_de.vm.VMDOS_buslock_de_04 vmdos_buslock_de.td.VMDOS_buslock_de_04
 ```
 
-Replace only the case name string when switching to a new case.
+Case name must be written in the short cfg filter form used by the runtime cfg, for example:
+
+```cfg
+vmdos_buslock_de.vm.VMDOS_buslock_de_01
+vmdos_buslock_de.td.VMDOS_buslock_de_01
+```
+
+If multiple cases need to run together, place them on the same `only ...` line separated by spaces, for example:
+
+```cfg
+only vmdos_buslock_de.vm.VMDOS_buslock_de_01 vmdos_buslock_de.td.VMDOS_buslock_de_01 vmdos_buslock_de.vm.VMDOS_buslock_de_02 vmdos_buslock_de.td.VMDOS_buslock_de_02
+```
+
+Do not rewrite case names into fully qualified forms such as `type_specific.myprovider...` and do not try alternative name styles. In this workflow, only the short cfg filter form is valid.
 
 ## Standard Execution Steps
 1. Open `/root/avocado/data/avocado-vt/backends/qemu/cfg/tdx_temp.cfg`.
 2. Locate `variants -> @run_test`.
-3. Modify the single `only ...` case name line.
+3. Modify the single `only ...` case name line using only the short cfg filter form such as `vmdos_buslock_de.vm.VMDOS_buslock_de_01`.
 4. Bootstrap vt config:
 
 ```bash
@@ -69,4 +82,7 @@ summary: <one-line conclusion>
 
 ## Notes
 - Do not modify other cfg filters unless explicitly requested.
+- For this agent, case names are cfg filter names, not Avocado full test IDs. Use `vmdos_buslock_de.<vm_or_td>.<case_name>` only.
+- If committing KVM-side changes related to this workflow, use a commit subject that starts with `KVM:`.
+- If committing agent or agent-document changes under `agents/`, use a commit subject that starts with `agents:`.
 - Keep this workflow unchanged to ensure reproducibility across case switches.
