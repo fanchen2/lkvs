@@ -16,6 +16,7 @@ description: Systematically migrate virtualization test cases from vmm_tree to L
    - [CASE_MIGRATION_QUICK_START](../guides/CASE_MIGRATION_QUICK_START.md)
    - [CASE_MIGRATION_ARCHITECTURE](../guides/CASE_MIGRATION_ARCHITECTURE.md)
    - [CASE_MIGRATION_CASE_PATTERNS](../guides/CASE_MIGRATION_CASE_PATTERNS.md)
+  - [PR_PRECHECK_RUNNER](./pr_precheck.agent.md)
 
 ## Goal
 Systematically migrate virtualization test cases from `vmm_tree` (legacy infrastructure) to LKVS (modern QEMU test provider) while preserving behavior and aligning with target project conventions.
@@ -88,6 +89,16 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
   - Verification scope statement (what gets verified: guest, host, cross-layer)
   - Commit message with explicit migration note
 
+### 6. Mandatory PR Precheck During Coding
+- During coding, follow [PR_PRECHECK_RUNNER](./pr_precheck.agent.md) as the default execution standard.
+- Full precheck set is mandatory before finalizing a coding task:
+  - CodeCheck (`./.github/scripts/pr_check`)
+  - Python 3.9 style/lint (`inspekt checkall ./KVM ...`)
+  - cfg-lint-check (`./.github/scripts/cfg-lint-check.py`)
+  - Cartesian syntax check (avocado-vt cartesian parser)
+- Do not omit `cfg-lint-check` or Cartesian syntax check when cfg files are changed.
+- If required tools are missing (for example `checkpatch.pl`, `inspekt`), install dependencies first, then continue checks.
+
 ## Migration Workflow (Per Case Group)
 
 ### Phase 1: Case Analysis & Mapping
@@ -158,6 +169,7 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
 
 ### Phase 4: Validation & Commit
 1. **Pre-commit local validation** (before push to avoid GitHub CI failures):
+  - **Mandatory full precheck path**: Run the complete flow in [PR_PRECHECK_RUNNER](./pr_precheck.agent.md) before final handoff.
    - **Python code lint**: Run inspekt on modified test files
      ```bash
      inspekt checkall ./KVM/qemu/tests/<test_file>.py --disable-style E501,E265,W601,E402,E722,E741 --no-license-check
@@ -178,6 +190,7 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
    - **BuildCheck**: Docker build validation for BM artifacts
    - **python-style-check**: inspekt lint on KVM test files
    - **cfg-lint-check**: CFG file linting for `/KVM/qemu/*.cfg`
+  - **cartesian-syntax-check**: Parse changed cfg files with avocado-vt cartesian parser
    - **commitlint** (if using avocado-vt): Validates commit message format
 
 3. **Pre-commit validation checklist**:
@@ -421,7 +434,9 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
   - [ ] BuildCheck: Docker build validation
   - [ ] python-style-check: inspekt on KVM test files
   - [ ] cfg-lint-check: CFG file syntax validation
+  - [ ] cartesian-syntax-check: Cartesian parser syntax validation on changed cfg files
   - [ ] commitlint: Commit message format (if applicable)
+- [ ] **PR precheck full-set policy applied**: use [PR_PRECHECK_RUNNER](./pr_precheck.agent.md); do not skip cfg-lint/cartesian checks for cfg changes
 - [ ] **Commit message** includes source reference and mapping summary
 - [ ] **Grep check** confirms no broken references or orphaned params
 - [ ] **Layer validation**: cfg type points to valid test; Python parses all required params

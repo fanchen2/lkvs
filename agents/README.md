@@ -7,6 +7,7 @@ agents/
 ├── agents/                                          ← Agent定义
 │   └── case_migration_framework.agent.md           ← 主协调agent
 │   └── avocado_case_runner.agent.md                ← 用例执行agent（先bootstrap，再改case名执行）
+│   └── pr_precheck.agent.md                        ← PR前检查agent（CodeCheck/Python3.9/Cfg lint/Cartesian）
 │
 ├── skills/                                          ← 可复用技能库
 │   ├── VMM_TREE_LEGACY_CASE_ANALYSIS_SKILL.md       ① 分析legacy case语义
@@ -27,6 +28,7 @@ agents/
 2. **理解架构** → 阅读 [Architecture Guide](guides/CASE_MIGRATION_ARCHITECTURE.md)
 3. **运行agent** → 使用 [Main Agent](agents/case_migration_framework.agent.md)
 4. **执行指定case** → 使用 [Avocado Case Runner](agents/avocado_case_runner.agent.md)
+5. **PR前检查** → 使用 [PR Precheck Runner](agents/pr_precheck.agent.md)
 
 ### 具体任务
 
@@ -43,6 +45,13 @@ agents/
 - **Boot repeat相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
 - **Memory sweep相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
 - **按固定流程执行单个case（先 `avocado vt-bootstrap --vt-type qemu`）** → 参考 [avocado_case_runner.agent.md](agents/avocado_case_runner.agent.md)。case 名必须写成 cfg 里的短过滤名，例如 `vmdos_buslock_de.vm.VMDOS_buslock_de_01`，不要改成 `type_specific.myprovider...` 之类的全限定名。
+- **执行PR前检查（必须全量执行）** → 参考 [pr_precheck.agent.md](agents/pr_precheck.agent.md)。默认必须包含：CodeCheck、Python3.9(inspekt)、Cfg lint、Cartesian syntax，并包含缺失依赖安装步骤。
+
+### PR前检查默认规则
+
+- 当用户请求“PR前检查 / PR precheck”时，默认执行 [pr_precheck.agent.md](agents/pr_precheck.agent.md) 定义的完整检查集。
+- 不允许省略 `cfg-lint-check` 或 `cartesian-syntax-check`。
+- 如遇 `checkpatch.pl` 或 `inspekt` 缺失，先按 agent 文档安装依赖再继续检查。
 
 ### Commit Prefix Rules
 
