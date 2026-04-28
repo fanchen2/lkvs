@@ -147,6 +147,20 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
    - All required params present (check handler's param expectations)
 
 ### Phase 3: Python Implementation or Routing
+0. **Before Writing Any Code: Check for Reusable Public Functions**
+   - Search **avocado-vt `virttest/`** for existing helpers matching the operation (e.g., `get_ker_cmd()`, `check_cpu_flags()`, `check_module()`, `get_pci_devices_in_group()`)
+     - Location: `../avocado-vt/virttest/utils_misc.py`, `utils_package.py`, `linux_modules.py`, etc.
+     - Pattern: import from `virttest` module; use `utils_misc.<function>()` or `utils_package.<function>()`
+   - Search **LKVS provider** for shared test utilities (e.g., `provider/cpu_utils.py`, `provider/test_utils.py`)
+     - Location: `KVM/qemu/provider/*.py`
+     - Pattern: import from `provider.<module>` and call directly
+   - For operations like:
+     - Kernel cmdline reading → use `utils_misc.get_ker_cmd()` instead of `process.run("cat /proc/cmdline")`
+     - CPU flag checking → use `provider.cpu_utils.check_cpu_flags()` instead of `grep /proc/cpuinfo`
+     - Package installation → use `utils_package.package_install()` instead of hand-written distro-specific commands
+     - Host kernel tracing → use `process.run()` for `/sys/kernel/debug` paths (no helper, but consistent pattern)
+   - Document in commit message any newly-discovered public functions that were reused, so future migrations can follow the same pattern
+
 1. **Determine routing**
    - If cfg `type` already exists and matches behavior, **cfg-only migration** (no Python change needed)
    - If new execution model required, create/update Python handler
@@ -388,6 +402,31 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
   - Add a negative test path (or dry-run reasoning) for a host cmdline without that key.
   - Confirm no callable misuse pattern such as `host_cmdline()` exists in check code.
 
+### Common Pitfall 12: Redundant Code by Skipping Public Function Lookup
+- **Risk**: Test code duplicates logic that already exists in shared libraries (`virttest`, `provider`), leading to maintenance overhead, inconsistent error handling, and missed bug fixes in the shared path.
+- **Real Example**: In `vmdos_buslock_de`, host kernel cmdline check was written as `process.run("cat /proc/cmdline", shell=True)` with manual `bytes`/`str` normalization, while `virttest.utils_misc.get_ker_cmd()` already provided the exact same functionality with cleaner output handling. Similarly, CPU flag checking was written as `grep -qw bus_lock_detect /proc/cpuinfo` instead of using `provider.cpu_utils.check_cpu_flags()`.
+- **Why It Happens**:
+  - Time pressure: Writing quick inline code feels faster than searching for existing helpers
+  - Unfamiliarity: Developer may not know public libraries exist or where to find them
+  - Mental model narrowing: "This is a simple operation, I'll just inline it" without checking scope
+  - Documentation gap: Public functions not clearly cataloged or discoverable from test code context
+- **Mitigation**:
+  - **Phase 3 Step 0 (MANDATORY)**: Before writing any new function, helper, or inline operation, search `avocado-vt/virttest/` and `LKVS/KVM/qemu/provider/` for existing implementations
+  - **Search pattern checklist**:
+    - Kernel operations → `virttest/utils_misc.py` (e.g., `get_ker_cmd()`, `get_os_vendor()`, module checks)
+    - Package management → `virttest/utils_package.py` (e.g., `package_install()`, `package_remove()`)
+    - CPU/host info → `LKVS/provider/cpu_utils.py` (e.g., `check_cpu_flags()`), `virttest/utils_misc.py`
+    - VM/QEMU utilities → `virttest/utils_vm.py`, `LKVS/provider/` modules
+    - For custom operation X: grep `def.*X|def.*check_X|def.*get_X` across library tree
+  - **Import and use**: Once helper is found, add import at module top and call it; avoid re-implementing the same logic inline
+  - **When no helper exists**: Implement inline but add a comment explaining why no shared utility was available; this signals to future maintainers that duplication should be extracted if the operation repeats elsewhere
+  - **Document patterns in commit**: When reusing or discovering new public functions, mention them in the commit message so future migrations are aware
+- **Validation**:
+  - For each helper function in test file, confirm that a similar public function does not already exist in `virttest` or `provider`
+  - Use code review: "Is this operation already available in a shared library? If yes, use it; if no, explain the gap."
+  - Post-migration audit: Grep test file for inline operations (e.g., `process.run("cat ..."`, manual string parsing, module loading loops) and check if they could be replaced by existing helpers
+  - Update shared library documentation (e.g., agent skill, provider README) if a gap is discovered that multiple test cases need filled
+
 ### Reusable Lessons From Scaled Multi-VM Cases
 
 1. **Separate Runtime Values From Sizing Values**
@@ -415,6 +454,11 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
 - [ ] **Source case identified** in vmm_tree with full path
 - [ ] **Parameter mapping table** created (legacy → LKVS)
 - [ ] **Naming convention** documented and applied consistently
+- [ ] **Public function lookup done** (MANDATORY before coding):
+  - [ ] Searched `avocado-vt/virttest/` for reusable helpers (utils_misc, utils_package, etc.)
+  - [ ] Searched `LKVS/KVM/qemu/provider/` for shared utilities
+  - [ ] For each major operation in test code, confirmed no existing public function was overlooked
+  - [ ] All located public functions are imported and used instead of inline implementations
 - [ ] **CFG translated** and structure validated (indentation, nesting)
 - [ ] **Python handler** verified (if new) or existing one checked for completeness
 - [ ] **Cfg-driven variables**: case file names, paths, command args, and tool names are defined in cfg and consumed via `params` (no per-case hardcoded literals in Python)
