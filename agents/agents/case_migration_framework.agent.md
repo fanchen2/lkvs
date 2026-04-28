@@ -99,6 +99,13 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
 - Do not omit `cfg-lint-check` or Cartesian syntax check when cfg files are changed.
 - If required tools are missing (for example `checkpatch.pl`, `inspekt`), install dependencies first, then continue checks.
 
+### 7. Commit Discipline: Only Commit When Explicitly Requested
+- **NEVER auto-commit changes** unless the user explicitly requests it (e.g., "commit", "请提交", "git commit")
+- After code modifications, wait for user confirmation before running `git commit`
+- If uncertain, ask: "Shall I commit these changes?" rather than committing silently
+- This respects the user's workflow: changes may be work-in-progress, requiring review before committing, or user may prefer to commit manually
+- Exception: **Pre-commit validation** (syntax checks, linting) should always run before user decides to commit; user sees results and decides whether to proceed
+
 ## Migration Workflow (Per Case Group)
 
 ### Phase 1: Case Analysis & Mapping
