@@ -16,7 +16,7 @@ Run a target LKVS KVM case with a fixed workflow so future runs only need one ch
 - If bootstrap or run becomes interactive for any other reason, stop and collect the required input before proceeding.
 
 ## Fixed Assets
-- Test implementation file: `KVM/qemu/tests/vmdos_buslock_de.py`
+- Test implementation file: `KVM/qemu/tests/buslock_de.py`
 - Runtime cfg file: `/root/avocado/data/avocado-vt/backends/qemu/cfg/tdx_temp.cfg`
 - Bootstrap command (must run before each case execution):
 
@@ -36,20 +36,20 @@ Edit only the `only ...` line under `variants -> @run_test` in `tdx_temp.cfg`.
 Current example:
 
 ```cfg
-only vmdos_buslock_de.vm.VMDOS_buslock_de_04 vmdos_buslock_de.td.VMDOS_buslock_de_04
+only buslock_de.vm.buslock_de_ratelimit buslock_de.td.buslock_de_ratelimit
 ```
 
 Case name must be written in the short cfg filter form used by the runtime cfg, for example:
 
 ```cfg
-vmdos_buslock_de.vm.VMDOS_buslock_de_01
-vmdos_buslock_de.td.VMDOS_buslock_de_01
+buslock_de.vm.buslock_de_warn
+buslock_de.td.buslock_de_warn
 ```
 
 If multiple cases need to run together, place them on the same `only ...` line separated by spaces, for example:
 
 ```cfg
-only vmdos_buslock_de.vm.VMDOS_buslock_de_01 vmdos_buslock_de.td.VMDOS_buslock_de_01 vmdos_buslock_de.vm.VMDOS_buslock_de_02 vmdos_buslock_de.td.VMDOS_buslock_de_02
+only buslock_de.vm.buslock_de_warn buslock_de.td.buslock_de_warn buslock_de.vm.buslock_de_off buslock_de.td.buslock_de_off
 ```
 
 Do not rewrite case names into fully qualified forms such as `type_specific.myprovider...` and do not try alternative name styles. In this workflow, only the short cfg filter form is valid.
@@ -57,7 +57,7 @@ Do not rewrite case names into fully qualified forms such as `type_specific.mypr
 ## Standard Execution Steps
 1. Open `/root/avocado/data/avocado-vt/backends/qemu/cfg/tdx_temp.cfg`.
 2. Locate `variants -> @run_test`.
-3. Modify the single `only ...` case name line using only the short cfg filter form such as `vmdos_buslock_de.vm.VMDOS_buslock_de_01`.
+3. Modify the single `only ...` case name line using only the short cfg filter form such as `buslock_de.vm.buslock_de_warn`.
 4. Bootstrap vt config. This step is required for every execution and must not be skipped even if the cfg was only inspected or listed:
 
 ```bash
@@ -100,7 +100,7 @@ summary: <one-line conclusion>
 
 ## Notes
 - Do not modify other cfg filters unless explicitly requested.
-- For this agent, case names are cfg filter names, not Avocado full test IDs. Use `vmdos_buslock_de.<vm_or_td>.<case_name>` only.
+- For this agent, case names are cfg filter names, not Avocado full test IDs. Use `buslock_de.<vm_or_td>.<case_name>` only.
 - For requests that mention this agent or this workflow, follow the mandatory workflow rules above rather than simplifying the sequence.
 - If committing KVM-side changes related to this workflow, use a commit subject that starts with `KVM:`.
 - If committing agent or agent-document changes under `agents/`, use a commit subject that starts with `agents:`.
