@@ -44,7 +44,7 @@ agents/
 
 - **Boot repeat相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
 - **Memory sweep相关** → 参考 [case_migration_framework.agent.md](agents/case_migration_framework.agent.md)
-- **按固定流程执行单个case（先 `avocado vt-bootstrap --vt-type qemu`）** → 参考 [avocado_case_runner.agent.md](agents/avocado_case_runner.agent.md)。case 名必须写成 cfg 里的短过滤名，例如 `vmdos_buslock_de.vm.VMDOS_buslock_de_01`，不要改成 `type_specific.myprovider...` 之类的全限定名。
+- **按固定流程执行单个case（先 `avocado vt-bootstrap --vt-type qemu`）** → 参考 [avocado_case_runner.agent.md](agents/avocado_case_runner.agent.md)。case 名必须写成 cfg 里的短过滤名，例如 `buslock_de.vm.buslock_de_warn`，不要改成 `type_specific.myprovider...` 之类的全限定名。
 - **执行PR前检查（必须全量执行）** → 参考 [pr_precheck.agent.md](agents/pr_precheck.agent.md)。默认必须包含：CodeCheck、Python3.9(inspekt)、Cfg lint、Cartesian syntax，并包含缺失依赖安装步骤。
 
 ### PR前检查默认规则
