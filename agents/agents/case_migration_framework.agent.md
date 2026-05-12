@@ -47,6 +47,7 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
 - Every code change must be reviewed immediately after editing.
 - Review focus: behavior correctness, parameter usage consistency, and side-effect scope.
 - Review must explicitly check for duplicated logic and redundant branches.
+- **Review must check for public function availability**: Before using any utility function or pattern, verify that avocado-vt (`virttest/` modules) or LKVS provider (`KVM/qemu/provider/`) does not already provide a public equivalent. Use existing public functions instead of implementing private duplicates.
 - If duplicate/redundant code is found, refactor to a single clear path before finalizing.
 - Default preference is concise code: keep implementation minimal while preserving readability.
 
@@ -54,6 +55,14 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
 - In executable files (`.py`, `.cfg`, shell, etc.), comments and docstrings must describe only what the code does and why it is needed at runtime.
 - Do not mention migration lineage or source project names in code comments (for example: `vmm_tree`, `XVS`, `legacy` history labels).
 - Keep historical provenance in commit messages or agent/migration documents, not in runtime code.
+- All functions must include parameter documentation in docstrings, following the current LKVS coding style (for example `:param name: description`, and `:return:` when applicable).
+
+### 1.3 CFG-First, No Speculative Extension
+- Use the **current cfg** as the source of truth for required behavior.
+- Do not add forward-looking parameter hooks for values that are not defined in current cfg variants.
+- Do not pre-implement "future" branches, defaults, or compatibility shims for requirements that have not appeared.
+- If cfg does not define a parameter and current behavior is fixed, prefer a direct fixed value in code over optional parameter reads.
+- Only introduce new parameterization when the current request explicitly requires cfg-driven variability.
 
 ### 2. Naming Normalization
 - Convert legacy snake_case names to LKVS conventions
@@ -228,9 +237,8 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
    - Add links to legacy case for future reference
 
 5. **Commit with full context**:
-   - Use migration-focused scope: e.g., `KVM/qemu: migrate <case_family> cases from vmm_tree`
-   - Include mapping table or summary in body
-   - Reference vmm_tree location (e.g., `Migrated from vmm_tree/validation/...`)
+   - Use scope: e.g., `KVM: add <case_family> cases`
+   - Include implementation details and verification scope in body
    - Document any behavior changes or approximations
    - Verify commit message will pass GitHub CI commitlint checks
 
@@ -550,8 +558,6 @@ Implementation details (if applicable):
   - Extended handler: <handler_name> with <mode_flag>
   - Supports: vm (standard), td (TDX), etc.
   - Verification: guest dmesg + host trace validation, MSR checks, etc.
-
-Migrated from: vmm_tree/validation/xvs/src/src/TestSuites/<suite>/ts1.sh
 
 Signed-off-by: <name> <email>
 ```

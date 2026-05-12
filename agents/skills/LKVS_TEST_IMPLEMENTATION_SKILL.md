@@ -29,32 +29,88 @@ Use this skill when:
 
 ## Process
 
+### Global Rule: Current-CFG-Only Implementation
+- Treat the current cfg as the only required scope.
+- Do not add speculative extensibility for parameters that are not present in current cfg.
+- Prefer fixed values in Python when cfg defines fixed behavior for current variants.
+- Add new params/branches only when explicitly requested by the user or required by existing cfg.
+- All functions must include parameter documentation in docstrings and follow current LKVS style (for example `:param name: description`, and `:return:` when applicable).
+
 ### Step 1: Select or Verify Execution Model
 - **Cfg-only migration** (most cases):
   - Use existing test handler (no Python changes)
   - Verify handler reads all migrated parameters
   - Add cfg comments linking to legacy source
-  - **Action**: Jump to Step 3 (verification)
+  - **Action**: Jump to Step 1.5 (public function check)
 
 - **New execution model required**:
   - Handler doesn't exist or semantics don't match
   - Implement new Python test or modify existing
-  - **Action**: Proceed to Step 2 (implementation)
+  - **Action**: Proceed to Step 1.5 (public function check), then Step 2 (implementation)
 
 Decision tree:
 ```
 Does existing handler match legacy behavior?
   ├─ YES: Use cfg-only
   │   └─ Verify: handler reads all params from mapping table
+  │       └─ Proceed to Step 1.5: Check public functions
   │       └─ Add cfg comment linking to vmm_tree
   │       └─ Done!
   └─ NO: Need Python changes
       ├─ Is it a parameter addition (no behavior change)?
       │   └─ Add params to cfg; verify handler reads them
+      │   └─ Proceed to Step 1.5: Check public functions
       │   └─ Done! (minimal change)
       └─ Is it a new algorithm/flow?
+          └─ Proceed to Step 1.5: Check public functions
           └─ Implement new test or refactor existing
           └─ Proceed to Step 2
+```
+
+### Step 1.5: Check Available Public Functions
+
+**MANDATORY**: Before implementing or using any private utility function in the test handler, always check for existing public equivalents in **both**:
+
+1. **LKVS provider modules** (`KVM/qemu/provider/*.py`)
+   ```bash
+   grep -r "^def " KVM/qemu/provider/*.py | grep -v "^_" | head -20
+   ```
+   Common utilities:
+   - `test_utils.py`: `get_baremetal_dir()`
+   - `utils_misc.py`: `verify_dmesg()`, `dmesg_time()`
+   - `cpu_utils.py`: TBD
+   - `dmesg_router`: logging integration
+
+2. **avocado-vt virttest modules** (`virttest/*.py`) — **REQUIRED CHECK**
+   ```bash
+   grep -r "^def [^_]" /path/to/avocado-vt/virttest/*.py | grep -E "utils_sys|utils_misc|utils_package"
+   ```
+   Common utilities:
+   - `virttest.utils_sys.check_dmesg_output()` — Check dmesg pattern (use instead of `dmesg | grep`)
+   - `virttest.utils_package.package_install()` — Install packages in guest session
+   - `virttest.utils_misc.get_usable_memory_size()` — Get host memory
+   - `virttest.utils_misc.verify_dmesg()` — Full dmesg error checking
+   - `virttest.cpu.get_cpu_vendor_name()` — Get host CPU vendor
+
+**Rule**: If a utility function exists in avocado-vt or LKVS provider, **use it**. Do **not** implement a private function to replicate the same functionality.
+
+**Rationale**:
+- Consistency across LKVS handlers
+- Maintenance (one shared implementation vs. many copies)
+- Bug fixes propagate automatically
+- Better logging integration
+
+**Example**:
+```python
+# ✗ Bad: private dmesg grep
+status = session.cmd_status("dmesg | grep REDUCE_VE")
+if status != 0:
+    test.fail("Pattern not found")
+
+# ✓ Good: use avocado-vt public function
+from virttest.utils_sys import check_dmesg_output
+if not check_dmesg_output("REDUCE_VE", session=session):
+    test.fail("Pattern not found")
 ```
 
 ### Step 2: Implement Python Test Handler
