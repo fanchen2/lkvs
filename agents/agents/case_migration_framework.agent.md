@@ -170,9 +170,12 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
    - Search **LKVS provider** for shared test utilities (e.g., `provider/cpu_utils.py`, `provider/test_utils.py`)
      - Location: `KVM/qemu/provider/*.py`
      - Pattern: import from `provider.<module>` and call directly
+   - **Search existing test files in `KVM/qemu/tests/`** for cases that solve the same sub-problem (e.g., CPUID checking, guest package install, kernel module loading). If an established pattern exists, reuse it exactly rather than inventing a new approach.
+     - Example: All CPUID bit-check cases use `get_baremetal_dir()` + `cpuid_utils.prepare_cpuid()` + `cpuid_utils.check_cpuid()` — do not invent `/dev/cpu` reads or inline assembly alternatives.
    - For operations like:
      - Kernel cmdline reading → use `utils_misc.get_ker_cmd()` instead of `process.run("cat /proc/cmdline")`
      - CPU flag checking → use `provider.cpu_utils.check_cpu_flags()` instead of `grep /proc/cpuinfo`
+     - CPUID bit checking → use `provider.cpuid_utils.check_cpuid()` with `get_baremetal_dir()` for source path
      - Package installation → use `utils_package.package_install()` instead of hand-written distro-specific commands
      - Host kernel tracing → use `process.run()` for `/sys/kernel/debug` paths (no helper, but consistent pattern)
    - Document in commit message any newly-discovered public functions that were reused, so future migrations can follow the same pattern
