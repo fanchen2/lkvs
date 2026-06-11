@@ -53,8 +53,8 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
 
 ### 1.2 Code-Only Comment Semantics
 - In executable files (`.py`, `.cfg`, shell, etc.), comments and docstrings must describe only what the code does and why it is needed at runtime.
-- Do not mention migration lineage or source project names in code comments (for example: `vmm_tree`, `XVS`, `legacy` history labels).
-- Keep historical provenance in commit messages or agent/migration documents, not in runtime code.
+- Do not mention migration lineage or source project names anywhere user-visible: code comments, docstrings, cfg comments, or commit messages (for example: `vmm_tree`, `XVS`, `legacy`, `Migrated from`).
+- Historical provenance is tracked only in internal agent/migration documents, never in repository artifacts.
 - All functions must include parameter documentation in docstrings, following the current LKVS coding style (for example `:param name: description`, and `:return:` when applicable).
 
 ### 1.3 CFG-First, No Speculative Extension
@@ -496,7 +496,7 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
   - [ ] cartesian-syntax-check: Cartesian parser syntax validation on changed cfg files
   - [ ] commitlint: Commit message format (if applicable)
 - [ ] **PR precheck full-set policy applied**: use [PR_PRECHECK_RUNNER](./pr_precheck.agent.md); do not skip cfg-lint/cartesian checks for cfg changes
-- [ ] **Commit message** includes source reference and mapping summary
+- [ ] **Commit message** describes new capability without migration/source references
 - [ ] **Grep check** confirms no broken references or orphaned params
 - [ ] **Layer validation**: cfg type points to valid test; Python parses all required params
 - [ ] **Multi-layer verification complete**: All guest-side checks ✓ + all host-side checks ✓ + cross-layer checks ✓ implemented or explicitly user-approved as excluded
@@ -524,8 +524,8 @@ This agent coordinates case analysis, parameter mapping, naming normalization, c
    - Columns: Legacy Param | Value/Range | Unit | LKVS Equivalent | Conversion
    - Flags any dropped or new parameters
 
-3. **Traceability Link** (in cfg comment or metadata)
-   - e.g., `# Migrated from vmm_tree/validation/kvm_pts/boot_repeat.cfg`
+3. **Traceability Link** (in internal agent/migration docs only, NOT in code or cfg)
+   - Never place source-project references in committed files
 
 ### Future Maintenance
 - Agent updates reflect new case patterns discovered during migration
@@ -565,6 +565,7 @@ Signed-off-by: <name> <email>
 **Template Notes**:
 - Use "KVM:" scope for KVM/qemu test additions
 - Focus on "add" (new capability) rather than "migrate" or "fix"
+- **Never** include migration source references (e.g., "Migrated from vmm_tree", "ported from XVS") in commit messages
 - Keep body brief; emphasize new feature, not legacy lineage
 - Mention handler extension or implementation pattern used
 - List supported variant types (vm, td, etc.)
