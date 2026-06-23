@@ -59,3 +59,18 @@ OK
 
 ## Expected result
 All test results should show pass, no fail.
+
+## User-mode fuzzing
+
+This component provides an Atheris-based user-mode fuzz entrypoint for pure
+Python helpers in `tpm2.py`.
+
+```
+cd BM/tpm
+python3 fuzz_tpm2_atheris.py -max_total_time=30
+```
+
+Notes:
+- This fuzzer does not require TPM device access because it targets data
+	formatting and protocol helper code paths.
+- Install dependency first if needed: `pip install atheris`.

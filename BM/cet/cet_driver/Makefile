@@ -16,7 +16,21 @@ cet_ioctl:
 
 clean:
 	$(MAKE) -C $(KERNEL_SOURCE) M=$(PWD) clean
-	${RM} -rf $(BIN)
+	${RM} -rf $(BIN) fuzz_cet_app
+
+# Fuzz targets (user-mode, no kernel headers needed)
+CLANG ?= clang
+FUZZ_FLAGS := -g -O1 -fno-omit-frame-pointer -fsanitize=fuzzer,address,undefined
+
+fuzz: fuzz_cet_app
+
+fuzz_cet_app: fuzz_cet_app.c
+	$(CLANG) $(FUZZ_FLAGS) $< -o $@
+
+fuzz-run: fuzz_cet_app
+	./fuzz_cet_app -max_total_time=30 -print_final_stats=1
+
+.PHONY: fuzz fuzz-run
 
 # Otherwise KERNELRELEASE is defined; we've been invoked from the
 # kernel build system and can use its language.
